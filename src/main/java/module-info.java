@@ -1,5 +1,6 @@
 module com.sitepark.ies.security.core {
   exports com.sitepark.ies.security.core.domain.entity;
+  exports com.sitepark.ies.security.core.domain.value;
   exports com.sitepark.ies.security.core.domain.exception;
   exports com.sitepark.ies.security.core.port;
 
@@ -11,6 +12,7 @@ module com.sitepark.ies.security.core {
   requires com.fasterxml.jackson.datatype.jsr310;
   requires com.github.spotbugs.annotations;
   requires com.sitepark.ies.sharedkernel;
+  requires org.jetbrains.annotations;
 
   opens com.sitepark.ies.security.core.port;
   opens com.sitepark.ies.security.core.domain.entity;

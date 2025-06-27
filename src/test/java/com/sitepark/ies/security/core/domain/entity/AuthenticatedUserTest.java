@@ -9,19 +9,34 @@ class AuthenticatedUserTest {
   @Test
   @SuppressWarnings("PMD.JUnitTestContainsTooManyAsserts")
   void testId() {
-    AuthenticatedUser user = AuthenticatedUser.builder().id("3").name("Test").login("test").build();
+    AuthenticatedUser user =
+        AuthenticatedUser.builder().id("3").lastName("Test").username("test").build();
     assertEquals("3", user.getId(), "Wrong id");
   }
 
   @Test
-  void testName() {
-    AuthenticatedUser user = AuthenticatedUser.builder().id("3").name("Test").login("test").build();
-    assertEquals("Test", user.getName(), "Wrong name");
+  void testLastName() {
+    AuthenticatedUser user =
+        AuthenticatedUser.builder().id("3").lastName("Test").username("test").build();
+    assertEquals("Test", user.getLastName(), "Wrong lastName");
   }
 
   @Test
-  void testLogin() {
-    AuthenticatedUser user = AuthenticatedUser.builder().id("3").name("Test").login("test").build();
-    assertEquals("test", user.getLogin(), "Wrong login");
+  void testFirstName() {
+    AuthenticatedUser user =
+        AuthenticatedUser.builder()
+            .id("3")
+            .firstName("Abc")
+            .lastName("Test")
+            .username("test")
+            .build();
+    assertEquals("Abc", user.getFirstName(), "Wrong firstName");
+  }
+
+  @Test
+  void testUsername() {
+    AuthenticatedUser user =
+        AuthenticatedUser.builder().id("3").lastName("Test").username("test").build();
+    assertEquals("test", user.getUsername(), "Wrong username");
   }
 }

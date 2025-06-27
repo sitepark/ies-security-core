@@ -1,15 +1,15 @@
 package com.sitepark.ies.security.core.port;
 
 import com.sitepark.ies.security.core.domain.entity.Session;
-import com.sitepark.ies.sharedkernel.security.Authentication;
+import com.sitepark.ies.security.core.domain.entity.UserBasedAuthentication;
 
 public interface SessionRegistry {
 
-  Session create(Authentication authentication);
+  Session create(UserBasedAuthentication authentication);
 
-  Session getSession(long sessionId);
+  Session getSession(String sessionId);
 
-  void close(long sessionId);
+  void close(String sessionId);
 
-  void touch(long sessionId);
+  void touch(String sessionId);
 }

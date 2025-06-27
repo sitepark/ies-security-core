@@ -23,32 +23,17 @@ public class AuthenticationManager {
   }
 
   public Authentication authenticate(Authentication authentication) {
-
-    try {
-      Authentication result = this.doAuthenticate(authentication);
-      result.eraseCredentials();
-      return result;
-    } catch (AuthenticationFailedException e) {
-      e.getAuthentication().eraseCredentials();
-      throw e;
-    }
+    return this.doAuthenticate(authentication);
   }
 
   private Authentication doAuthenticate(Authentication authentication) {
 
-    Authentication next = null;
-
     for (AuthenticationProvider provider : this.authenticationProviderSet) {
       if (provider.supports(authentication)) {
-        Authentication result = provider.authenticat(authentication);
-        if (result.isAuthenticated()) {
-          return result;
-        } else {
-          next = result;
-        }
+        return provider.authenticat(authentication);
       }
     }
 
-    throw new AuthenticationFailedException(next, "Uncomplete authentication chain");
+    throw new AuthenticationFailedException("Uncomplete authentication chain");
   }
 }
