@@ -1,13 +1,17 @@
 package com.sitepark.ies.security.core.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sitepark.ies.sharedkernel.security.AuthFactor;
 import com.sitepark.ies.sharedkernel.security.AuthMethod;
 import com.sitepark.ies.sharedkernel.security.User;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
+@SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName", "PMD.TooManyMethods"})
 @JsonDeserialize(builder = AuthenticatedUser.Builder.class)
 public final class AuthenticatedUser {
 
@@ -16,77 +20,74 @@ public final class AuthenticatedUser {
   private final String firstName;
   private final String lastName;
   private final String email;
-  private final AuthMethod[] authMethods;
-  private final AuthFactor[] authFactors;
+  private final List<AuthMethod> authMethods;
+  private final List<AuthFactor> authFactors;
 
-  private AuthenticatedUser(Builder builder) {
+  public AuthenticatedUser(Builder builder) {
     this.id = builder.id;
     this.username = builder.username;
     this.firstName = builder.firstName;
     this.lastName = builder.lastName;
     this.email = builder.email;
-    this.authMethods = builder.authMethods;
-    this.authFactors = builder.authFactors;
+    this.authMethods = List.copyOf(builder.authMethods);
+    this.authFactors = List.copyOf(builder.authFactors);
   }
 
-  public String getId() {
-    return this.id;
+  public String id() {
+    return id;
   }
 
-  public String getUsername() {
-    return this.username;
+  public String username() {
+    return username;
   }
 
-  public String getFirstName() {
-    return this.firstName;
+  public String firstName() {
+    return firstName;
   }
 
-  public String getLastName() {
-    return this.lastName;
+  public String lastName() {
+    return lastName;
   }
 
-  public String getEmail() {
-    return this.email;
+  public String email() {
+    return email;
   }
 
-  public AuthMethod[] getAuthMethods() {
-    return this.authMethods.clone();
+  public List<AuthMethod> authMethods() {
+    return authMethods;
   }
 
-  public AuthFactor[] getAuthFactor() {
-    return this.authFactors.clone();
+  public List<AuthFactor> authFactors() {
+    return authFactors;
+  }
+
+  public String getName() {
+    StringBuilder name = new StringBuilder();
+    if (firstName != null && !firstName.trim().isBlank()) {
+      name.append(firstName.trim());
+    }
+    if (!name.isEmpty()) {
+      name.append(' ');
+    }
+    name.append(lastName.trim());
+    return name.toString();
   }
 
   public static AuthenticatedUser fromUser(User user) {
     return builder()
-        .id(user.getId())
-        .username(user.getUsername())
-        .firstName(user.getFirstName())
-        .lastName(user.getLastName())
-        .email(user.getEmail())
-        .authMethods(user.getAuthMethods())
-        .authFactors(user.getAuthFactors())
+        .id(user.id())
+        .username(user.username())
+        .lastName(user.lastName())
+        .firstName(user.firstName())
+        .email(user.email())
+        .authMethods(user.authMethods())
+        .authFactors(user.authFactors())
         .build();
-  }
-
-  public static Builder builder() {
-    return new Builder();
-  }
-
-  public Builder toBuilder() {
-    return new Builder(this);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(
-        id,
-        username,
-        firstName,
-        lastName,
-        email,
-        Arrays.hashCode(authMethods),
-        Arrays.hashCode(authFactors));
+    return Objects.hash(id, username, firstName, lastName, email, authMethods, authFactors);
   }
 
   @Override
@@ -99,13 +100,13 @@ public final class AuthenticatedUser {
         && Objects.equals(this.firstName, that.firstName)
         && Objects.equals(this.lastName, that.lastName)
         && Objects.equals(this.email, that.email)
-        && Arrays.equals(this.authMethods, that.authMethods)
-        && Arrays.equals(this.authFactors, that.authFactors);
+        && Objects.equals(this.authMethods, that.authMethods)
+        && Objects.equals(this.authFactors, that.authFactors);
   }
 
   @Override
   public String toString() {
-    return "AuthenticatedUser{"
+    return "User{"
         + "id='"
         + id
         + '\''
@@ -122,10 +123,18 @@ public final class AuthenticatedUser {
         + email
         + '\''
         + ", authMethods="
-        + Arrays.toString(authMethods)
+        + authMethods
         + ", authFactors="
-        + Arrays.toString(authFactors)
+        + authFactors
         + '}';
+  }
+
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  public Builder toBuilder() {
+    return new Builder(this);
   }
 
   @JsonPOJOBuilder(withPrefix = "")
@@ -136,8 +145,8 @@ public final class AuthenticatedUser {
     private String firstName;
     private String lastName;
     private String email;
-    private AuthMethod[] authMethods;
-    private AuthFactor[] authFactors;
+    private final List<AuthMethod> authMethods = new ArrayList<>();
+    private final List<AuthFactor> authFactors = new ArrayList<>();
 
     private Builder() {}
 
@@ -147,8 +156,8 @@ public final class AuthenticatedUser {
       this.firstName = user.firstName;
       this.lastName = user.lastName;
       this.email = user.email;
-      this.authMethods = user.authMethods.clone();
-      this.authFactors = user.authFactors.clone();
+      this.authMethods.addAll(user.authMethods);
+      this.authFactors.addAll(user.authFactors);
     }
 
     public Builder id(String id) {
@@ -164,7 +173,6 @@ public final class AuthenticatedUser {
     }
 
     public Builder firstName(String firstName) {
-      Objects.requireNonNull(firstName, "firstName cannot be null");
       this.firstName = firstName;
       return this;
     }
@@ -176,20 +184,53 @@ public final class AuthenticatedUser {
     }
 
     public Builder email(String email) {
-      Objects.requireNonNull(email, "email cannot be null");
       this.email = email;
+      return this;
+    }
+
+    @JsonSetter
+    public Builder authMethods(Collection<AuthMethod> authMethods) {
+      Objects.requireNonNull(authMethods, "authMethods cannot be null");
+      for (AuthMethod authMethod : authMethods) {
+        this.authMethod(authMethod);
+      }
       return this;
     }
 
     public Builder authMethods(AuthMethod... authMethods) {
       Objects.requireNonNull(authMethods, "authMethods cannot be null");
-      this.authMethods = authMethods.clone();
+      for (AuthMethod authMethod : authMethods) {
+        this.authMethod(authMethod);
+      }
+      return this;
+    }
+
+    public Builder authMethod(AuthMethod authMethod) {
+      Objects.requireNonNull(authMethod, "authMethod cannot be null");
+      this.authMethods.add(authMethod);
+      return this;
+    }
+
+    @JsonSetter
+    public Builder authFactors(Collection<AuthFactor> authFactors) {
+      Objects.requireNonNull(authFactors, "authFactors cannot be null");
+      for (AuthFactor authFactor : authFactors) {
+        this.authFactor(authFactor);
+      }
       return this;
     }
 
     public Builder authFactors(AuthFactor... authFactors) {
       Objects.requireNonNull(authFactors, "authFactors cannot be null");
-      this.authFactors = authFactors.clone();
+      for (AuthFactor authFactor : authFactors) {
+        this.authFactor(authFactor);
+      }
+      return this;
+    }
+
+    public Builder authFactor(AuthFactor authFactor) {
+      Objects.requireNonNull(authFactor, "authFactor cannot be null");
+      this.authFactors.add(authFactor);
       return this;
     }
 
@@ -197,11 +238,8 @@ public final class AuthenticatedUser {
       Objects.requireNonNull(id, "id cannot be null");
       Objects.requireNonNull(username, "username cannot be null");
       Objects.requireNonNull(lastName, "lastName cannot be null");
-      if (this.authMethods == null) {
-        this.authMethods = new AuthMethod[] {};
-      }
-      if (this.authFactors == null) {
-        this.authFactors = new AuthFactor[] {};
+      if (lastName.trim().isBlank()) {
+        throw new IllegalArgumentException("lastName cannot be blank");
       }
       return new AuthenticatedUser(this);
     }

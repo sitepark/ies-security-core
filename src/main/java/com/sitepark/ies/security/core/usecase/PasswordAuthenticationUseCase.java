@@ -13,7 +13,8 @@ import com.sitepark.ies.sharedkernel.security.PasswordEncoder;
 import com.sitepark.ies.sharedkernel.security.User;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import jakarta.inject.Inject;
-import java.time.OffsetDateTime;
+import java.time.Clock;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -22,6 +23,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class PasswordAuthenticationUseCase {
+
+  private final Clock clock;
 
   private final UserService userService;
 
@@ -36,10 +39,12 @@ public class PasswordAuthenticationUseCase {
   @Inject
   @SuppressFBWarnings("EI_EXPOSE_REP2")
   public PasswordAuthenticationUseCase(
+      Clock clock,
       UserService userService,
       PasswordEncoder passwordEncoder,
       AuthenticationAttemptLimiter loginAttemptLimiter,
       AuthenticationProcessStore authenticationSessionStore) {
+    this.clock = clock;
     this.userService = userService;
     this.passwordEncoder = passwordEncoder;
     this.loginAttemptLimiter = loginAttemptLimiter;
@@ -61,7 +66,7 @@ public class PasswordAuthenticationUseCase {
 
     upgradePasswordHashIfNeeded(user, password);
 
-    if (user.getAuthFactors().length == 0) {
+    if (user.authFactors().isEmpty()) {
       return AuthenticationResult.success(AuthenticatedUser.fromUser(user));
     }
 
@@ -73,7 +78,7 @@ public class PasswordAuthenticationUseCase {
                 user,
                 AuthMethod.PASSWORD,
                 requirements.toArray(AuthenticationRequirement[]::new),
-                OffsetDateTime.now()));
+                Instant.now(this.clock)));
 
     return AuthenticationResult.partial(
         authProcessId, requirements.toArray(AuthenticationRequirement[]::new));
@@ -108,7 +113,7 @@ public class PasswordAuthenticationUseCase {
       return Optional.empty();
     }
     User user = optUser.get();
-    if (!passwordEncoder.matches(password, user.getPasswordHash())) {
+    if (!passwordEncoder.matches(password, user.passwordHash())) {
       this.loginAttemptLimiter.onFailedLogin(username);
       return Optional.empty();
     }
@@ -117,15 +122,15 @@ public class PasswordAuthenticationUseCase {
   }
 
   private void upgradePasswordHashIfNeeded(User user, String password) {
-    if (passwordEncoder.upgradeEncoding(user.getPasswordHash())) {
+    if (passwordEncoder.upgradeEncoding(user.passwordHash())) {
       String upgradedHash = passwordEncoder.encode(password);
-      this.userService.upgradePasswordHash(user.getUsername(), upgradedHash);
+      this.userService.upgradePasswordHash(user.username(), upgradedHash);
     }
   }
 
   private List<AuthenticationRequirement> getLoginRequirements(User user) {
     List<AuthenticationRequirement> requirements = new ArrayList<>();
-    for (AuthFactor authFactor : user.getAuthFactors()) {
+    for (AuthFactor authFactor : user.authFactors()) {
       if (Objects.requireNonNull(authFactor) == AuthFactor.TOTP) {
         requirements.add(AuthenticationRequirement.TOTP_CODE_REQUIRED);
       } else {

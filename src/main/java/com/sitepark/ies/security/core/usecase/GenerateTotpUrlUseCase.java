@@ -41,8 +41,8 @@ public class GenerateTotpUrlUseCase {
             .orElseThrow(() -> this.createAccessDeniedException(userId));
 
     String secret = this.totpProvider.generateSecret();
-    this.vaultProvider.getUserVault(user.getId()).storeSecret(VaultEntryNames.TOTP_SECRET, secret);
-    return new TotpUrl(issuer, user.getUsername(), secret);
+    this.vaultProvider.getUserVault(user.id()).storeSecret(VaultEntryNames.TOTP_SECRET, secret);
+    return new TotpUrl(issuer, user.username(), secret);
   }
 
   private AccessDeniedException createAccessDeniedException(String userId) {

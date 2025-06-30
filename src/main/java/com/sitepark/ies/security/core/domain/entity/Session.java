@@ -6,6 +6,7 @@ import java.time.Instant;
 import java.util.Objects;
 
 @JsonDeserialize(builder = Session.Builder.class)
+@SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
 public final class Session {
 
   private final String id;
@@ -20,15 +21,15 @@ public final class Session {
     this.authentication = builder.authentication;
   }
 
-  public String getId() {
+  public String id() {
     return this.id;
   }
 
-  public Instant getCreatedAt() {
+  public Instant createdAt() {
     return this.createdAt;
   }
 
-  public UserBasedAuthentication getAuthentication() {
+  public UserBasedAuthentication authentication() {
     return this.authentication;
   }
 
@@ -81,6 +82,7 @@ public final class Session {
 
     private Builder(Session session) {
       this.id = session.id;
+      this.createdAt = session.createdAt;
       this.authentication = session.authentication;
     }
 

@@ -38,7 +38,7 @@ public class ValidateTotpCodeUseCase {
                         "Authentication process not found: " + authProcessId));
 
     boolean codeRequired =
-        Arrays.stream(authState.getRequirements())
+        Arrays.stream(authState.requirements())
             .anyMatch(requirement -> requirement == AuthenticationRequirement.TOTP_CODE_REQUIRED);
 
     if (!codeRequired) {
@@ -48,7 +48,7 @@ public class ValidateTotpCodeUseCase {
 
     String secret =
         this.vaultProvider
-            .getUserVault(authState.getUserId())
+            .getUserVault(authState.user().id())
             .loadSecret(VaultEntryNames.TOTP_SECRET);
 
     boolean isValid = this.totpProvider.validateTotpCode(secret, totpCode);
@@ -57,12 +57,12 @@ public class ValidateTotpCodeUseCase {
     }
 
     AuthenticationRequirement[] remainingRequirements =
-        Arrays.stream(authState.getRequirements())
+        Arrays.stream(authState.requirements())
             .filter(requirement -> requirement != AuthenticationRequirement.TOTP_CODE_REQUIRED)
             .toArray(AuthenticationRequirement[]::new);
 
     if (remainingRequirements.length == 0) {
-      return AuthenticationResult.success(AuthenticatedUser.fromUser(authState.getUser()));
+      return AuthenticationResult.success(AuthenticatedUser.fromUser(authState.user()));
     }
 
     return AuthenticationResult.partial(authProcessId, remainingRequirements);

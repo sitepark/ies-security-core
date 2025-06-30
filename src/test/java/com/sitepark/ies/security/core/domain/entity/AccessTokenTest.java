@@ -12,10 +12,9 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.List;
 import nl.jqno.equalsverifier.EqualsVerifier;
@@ -34,7 +33,6 @@ class AccessTokenTest {
   private static final String TOKEN_NAME = "Test Token";
 
   @Test
-  @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
   void testEquals() {
     EqualsVerifier.forClass(AccessToken.class).verify();
   }
@@ -42,7 +40,7 @@ class AccessTokenTest {
   @Test
   void testSetUser() throws JsonProcessingException {
     AccessToken accessToken = AccessToken.builder().user("345").name(TOKEN_NAME).build();
-    assertEquals("345", accessToken.getUser(), "wrong user");
+    assertEquals("345", accessToken.user(), "wrong user");
   }
 
   @Test
@@ -75,7 +73,7 @@ class AccessTokenTest {
   @Test
   void testSetName() throws JsonProcessingException {
     AccessToken accessToken = AccessToken.builder().user("345").name(TOKEN_NAME).build();
-    assertEquals(TOKEN_NAME, accessToken.getName(), "wrong name");
+    assertEquals(TOKEN_NAME, accessToken.name(), "wrong name");
   }
 
   @Test
@@ -99,7 +97,7 @@ class AccessTokenTest {
   @Test
   void testBuildUserNotSet() throws JsonProcessingException {
     assertThrows(
-        IllegalStateException.class,
+        NullPointerException.class,
         () -> {
           AccessToken.builder().name(TOKEN_NAME).build();
         });
@@ -108,7 +106,7 @@ class AccessTokenTest {
   @Test
   void testBuildNameNotSet() throws JsonProcessingException {
     assertThrows(
-        IllegalStateException.class,
+        NullPointerException.class,
         () -> {
           AccessToken.builder().user("123").build();
         });
@@ -117,13 +115,13 @@ class AccessTokenTest {
   @Test
   void testSetId() throws JsonProcessingException {
     AccessToken accessToken = this.createBuilderWithRequiredValues().id("123").build();
-    assertEquals("123", accessToken.getId().get(), "wrong id");
+    assertEquals("123", accessToken.id().get(), "wrong id");
   }
 
   @Test
   void testGetEmptyId() throws JsonProcessingException {
     AccessToken accessToken = this.createBuilderWithRequiredValues().build();
-    assertTrue(accessToken.getId().isEmpty(), "id should be empty");
+    assertTrue(accessToken.id().isEmpty(), "id should be empty");
   }
 
   @Test
@@ -156,7 +154,7 @@ class AccessTokenTest {
   @Test
   void testSetToken() throws JsonProcessingException {
     AccessToken accessToken = this.createBuilderWithRequiredValues().token("abc").build();
-    assertEquals("abc", accessToken.getToken().get(), "wrong token");
+    assertEquals("abc", accessToken.token(), "wrong token");
   }
 
   @Test
@@ -180,12 +178,11 @@ class AccessTokenTest {
   @Test
   void testSetCreatedAt() throws JsonProcessingException {
 
-    OffsetDateTime createdAt =
-        LocalDate.of(2023, 8, 21).atStartOfDay().atZone(ZONE_ID).toOffsetDateTime();
+    Instant createdAt = LocalDate.of(2023, 8, 21).atStartOfDay().atZone(ZONE_ID).toInstant();
 
     AccessToken accessToken = this.createBuilderWithRequiredValues().createdAt(createdAt).build();
 
-    assertEquals(createdAt, accessToken.getCreatedAt().get(), "unexpected createAt");
+    assertEquals(createdAt, accessToken.createdAt(), "unexpected createAt");
   }
 
   @Test
@@ -200,12 +197,11 @@ class AccessTokenTest {
   @Test
   void testSetExpiresAt() throws JsonProcessingException {
 
-    OffsetDateTime expiresAt =
-        LocalDate.of(2023, 8, 21).atStartOfDay().atZone(ZONE_ID).toOffsetDateTime();
+    Instant expiresAt = LocalDate.of(2023, 8, 21).atStartOfDay().atZone(ZONE_ID).toInstant();
 
     AccessToken accessToken = this.createBuilderWithRequiredValues().expiresAt(expiresAt).build();
 
-    assertEquals(expiresAt, accessToken.getExpiresAt().get(), "unexpected expiresAt");
+    assertEquals(expiresAt, accessToken.expiresAt(), "unexpected expiresAt");
   }
 
   @Test
@@ -220,12 +216,11 @@ class AccessTokenTest {
   @Test
   void testSetLastUsed() throws JsonProcessingException {
 
-    OffsetDateTime lastUsed =
-        LocalDate.of(2023, 8, 21).atStartOfDay().atZone(ZONE_ID).toOffsetDateTime();
+    Instant lastUsed = LocalDate.of(2023, 8, 21).atStartOfDay().atZone(ZONE_ID).toInstant();
 
     AccessToken accessToken = this.createBuilderWithRequiredValues().lastUsed(lastUsed).build();
 
-    assertEquals(lastUsed, accessToken.getLastUsed().get(), "unexpected lastUsed");
+    assertEquals(lastUsed, accessToken.lastUsed(), "unexpected lastUsed");
   }
 
   @Test
@@ -243,7 +238,7 @@ class AccessTokenTest {
     AccessToken accessToken =
         this.createBuilderWithRequiredValues().scopeList(Arrays.asList("a", "b")).build();
 
-    assertEquals(Arrays.asList("a", "b"), accessToken.getScopeList(), "unexpected scopeList");
+    assertEquals(Arrays.asList("a", "b"), accessToken.scopeList(), "unexpected scopeList");
   }
 
   @Test
@@ -274,31 +269,28 @@ class AccessTokenTest {
   }
 
   @Test
-  @SuppressWarnings("PMD.AvoidDuplicateLiterals")
   void testOverwriteScopeListViaList() throws JsonProcessingException {
     AccessToken accessToken =
         this.createBuilderWithRequiredValues().scopeList(Arrays.asList("a", "b")).build();
 
     AccessToken overwritten = accessToken.toBuilder().scopeList(Arrays.asList("c", "d")).build();
 
-    assertEquals(Arrays.asList("c", "d"), overwritten.getScopeList(), "unexpected scopeList");
+    assertEquals(Arrays.asList("c", "d"), overwritten.scopeList(), "unexpected scopeList");
   }
 
   @Test
-  @SuppressWarnings("PMD.AvoidDuplicateLiterals")
   void testSetScopeListViaVArgs() throws JsonProcessingException {
     AccessToken accessToken = this.createBuilderWithRequiredValues().scopeList("a", "b").build();
 
-    assertEquals(Arrays.asList("a", "b"), accessToken.getScopeList(), "unexpected scopeList");
+    assertEquals(Arrays.asList("a", "b"), accessToken.scopeList(), "unexpected scopeList");
   }
 
   @Test
-  @SuppressWarnings("PMD.AvoidDuplicateLiterals")
   void testOverwriteScopeListViaVArgs() throws JsonProcessingException {
     AccessToken accessToken = this.createBuilderWithRequiredValues().scopeList("a", "b").build();
     AccessToken overwritten = accessToken.toBuilder().scopeList("c", "d").build();
 
-    assertEquals(Arrays.asList("c", "d"), overwritten.getScopeList(), "unexpected scopeList");
+    assertEquals(Arrays.asList("c", "d"), overwritten.scopeList(), "unexpected scopeList");
   }
 
   @Test
@@ -329,13 +321,12 @@ class AccessTokenTest {
   }
 
   @Test
-  @SuppressWarnings("PMD.AvoidDuplicateLiterals")
   void testAddScope() throws JsonProcessingException {
     AccessToken accessToken = this.createBuilderWithRequiredValues().scopeList("a", "b").build();
 
     AccessToken addition = accessToken.toBuilder().scope("c").build();
 
-    assertEquals(Arrays.asList("a", "b", "c"), addition.getScopeList(), "unexpected scopes");
+    assertEquals(Arrays.asList("a", "b", "c"), addition.scopeList(), "unexpected scopes");
   }
 
   @Test
@@ -359,37 +350,37 @@ class AccessTokenTest {
   @Test
   void testSetImpersonationTrue() throws JsonProcessingException {
     AccessToken accessToken = this.createBuilderWithRequiredValues().impersonation(true).build();
-    assertTrue(accessToken.isImpersonation(), "unexpected impersonation");
+    assertTrue(accessToken.impersonation(), "unexpected impersonation");
   }
 
   @Test
   void testSetImpersonationFalse() throws JsonProcessingException {
     AccessToken accessToken = this.createBuilderWithRequiredValues().impersonation(false).build();
-    assertFalse(accessToken.isImpersonation(), "unexpected impersonation");
+    assertFalse(accessToken.impersonation(), "unexpected impersonation");
   }
 
   @Test
   void testSetActiveTrue() throws JsonProcessingException {
     AccessToken accessToken = this.createBuilderWithRequiredValues().active(true).build();
-    assertTrue(accessToken.isActive(), "unexpected active");
+    assertTrue(accessToken.active(), "unexpected active");
   }
 
   @Test
   void testSetActiveFalse() throws JsonProcessingException {
     AccessToken accessToken = this.createBuilderWithRequiredValues().active(false).build();
-    assertFalse(accessToken.isActive(), "unexpected active");
+    assertFalse(accessToken.active(), "unexpected active");
   }
 
   @Test
   void testSetRevokedTrue() throws JsonProcessingException {
     AccessToken accessToken = this.createBuilderWithRequiredValues().revoked(true).build();
-    assertTrue(accessToken.isRevoked(), "unexpected revoked");
+    assertTrue(accessToken.revoked(), "unexpected revoked");
   }
 
   @Test
   void testSetRevokedFalse() throws JsonProcessingException {
     AccessToken accessToken = this.createBuilderWithRequiredValues().revoked(false).build();
-    assertFalse(accessToken.isRevoked(), "unexpected revoked");
+    assertFalse(accessToken.revoked(), "unexpected revoked");
   }
 
   @Test
@@ -398,15 +389,11 @@ class AccessTokenTest {
     ObjectMapper mapper = new ObjectMapper();
     mapper.registerModule(new Jdk8Module());
     mapper.registerModule(new JavaTimeModule());
-    mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
-
-    OffsetDateTime createdAt =
-        LocalDate.of(2023, 8, 21).atStartOfDay().atZone(ZONE_ID).toOffsetDateTime();
-    OffsetDateTime expiredAt =
-        LocalDate.of(2023, 12, 12).atStartOfDay().atZone(ZONE_ID).toOffsetDateTime();
-    OffsetDateTime lastUpdate =
-        LocalDate.of(2023, 8, 25).atStartOfDay().atZone(ZONE_ID).toOffsetDateTime();
+    mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    Instant createdAt = LocalDate.of(2023, 8, 21).atStartOfDay().atZone(ZONE_ID).toInstant();
+    Instant expiredAt = LocalDate.of(2023, 12, 12).atStartOfDay().atZone(ZONE_ID).toInstant();
+    Instant lastUpdate = LocalDate.of(2023, 8, 25).atStartOfDay().atZone(ZONE_ID).toInstant();
 
     AccessToken accessToken =
         AccessToken.builder()
@@ -427,9 +414,9 @@ class AccessTokenTest {
         "id":"123",\
         "user":"345",\
         "name":"Test Token",\
-        "createdAt":"2023-08-21T00:00:00+02:00",\
-        "expiresAt":"2023-12-12T00:00:00+01:00",\
-        "lastUsed":"2023-08-25T00:00:00+02:00",\
+        "createdAt":"2023-08-20T22:00:00Z",\
+        "expiresAt":"2023-12-11T23:00:00Z",\
+        "lastUsed":"2023-08-24T22:00:00Z",\
         "impersonation":true,\
         "active":true,\
         "revoked":false\
@@ -464,24 +451,9 @@ class AccessTokenTest {
 
     AccessToken accessToken = mapper.readValue(json, AccessToken.class);
 
-    OffsetDateTime createdAt =
-        LocalDate.of(2023, 8, 21)
-            .atStartOfDay()
-            .atZone(ZONE_ID)
-            .toOffsetDateTime()
-            .withOffsetSameInstant(ZoneOffset.UTC);
-    OffsetDateTime expiredAt =
-        LocalDate.of(2023, 12, 12)
-            .atStartOfDay()
-            .atZone(ZONE_ID)
-            .toOffsetDateTime()
-            .withOffsetSameInstant(ZoneOffset.UTC);
-    OffsetDateTime lastUpdate =
-        LocalDate.of(2023, 8, 25)
-            .atStartOfDay()
-            .atZone(ZONE_ID)
-            .toOffsetDateTime()
-            .withOffsetSameInstant(ZoneOffset.UTC);
+    Instant createdAt = LocalDate.of(2023, 8, 21).atStartOfDay().atZone(ZONE_ID).toInstant();
+    Instant expiredAt = LocalDate.of(2023, 12, 12).atStartOfDay().atZone(ZONE_ID).toInstant();
+    Instant lastUpdate = LocalDate.of(2023, 8, 25).atStartOfDay().atZone(ZONE_ID).toInstant();
 
     AccessToken expected =
         AccessToken.builder()

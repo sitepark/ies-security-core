@@ -2,43 +2,53 @@ package com.sitepark.ies.security.core.domain.value;
 
 import com.sitepark.ies.sharedkernel.security.AuthMethod;
 import com.sitepark.ies.sharedkernel.security.User;
-import java.time.OffsetDateTime;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.Objects;
 
-@SuppressWarnings("PMD.DataClass")
-public class PartialAuthenticationState {
-  private final User user;
-  private final AuthMethod method;
-  private final AuthenticationRequirement[] requirements;
-  private final OffsetDateTime createdAt;
-
+public record PartialAuthenticationState(
+    User user, AuthMethod method, AuthenticationRequirement[] requirements, Instant createdAt) {
   public PartialAuthenticationState(
-      User user,
-      AuthMethod method,
-      AuthenticationRequirement[] requirements,
-      OffsetDateTime createdAt) {
+      User user, AuthMethod method, AuthenticationRequirement[] requirements, Instant createdAt) {
     this.user = user;
     this.method = method;
-    this.requirements = requirements != null ? requirements : new AuthenticationRequirement[] {};
+    this.requirements =
+        requirements != null ? requirements.clone() : new AuthenticationRequirement[] {};
     this.createdAt = createdAt;
   }
 
-  public User getUser() {
-    return user;
-  }
-
-  public String getUserId() {
-    return user.getId();
-  }
-
-  public AuthMethod getMethod() {
-    return method;
-  }
-
-  public AuthenticationRequirement[] getRequirements() {
+  @Override
+  public AuthenticationRequirement[] requirements() {
     return requirements.clone();
   }
 
-  public OffsetDateTime getCreatedAt() {
-    return createdAt;
+  @Override
+  public int hashCode() {
+    return Objects.hash(user, method, Arrays.hashCode(requirements), createdAt);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof PartialAuthenticationState that)) {
+      return false;
+    }
+    return Objects.equals(this.user, that.user)
+        && Objects.equals(this.method, that.method)
+        && Arrays.equals(this.requirements, that.requirements)
+        && Objects.equals(this.createdAt, that.createdAt);
+  }
+
+  @Override
+  public String toString() {
+    return "PartialAuthenticationState{"
+        + "user="
+        + user
+        + ", method="
+        + method
+        + ", requirements="
+        + Arrays.toString(requirements)
+        + ", createdAt="
+        + createdAt
+        + '}';
   }
 }

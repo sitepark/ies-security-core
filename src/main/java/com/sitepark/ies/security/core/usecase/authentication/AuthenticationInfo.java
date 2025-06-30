@@ -1,16 +1,18 @@
 package com.sitepark.ies.security.core.usecase.authentication;
 
 import com.sitepark.ies.sharedkernel.security.AuthMethod;
+import java.util.Collections;
+import java.util.List;
 
 public class AuthenticationInfo {
-  private final AuthMethod[] authMethods;
+  private final List<AuthMethod> authMethods;
 
-  @SuppressWarnings("PMD.UseVarargs")
-  public AuthenticationInfo(AuthMethod[] authMethods) {
-    this.authMethods = authMethods != null ? authMethods : new AuthMethod[] {};
+  public AuthenticationInfo(List<AuthMethod> authMethods) {
+    this.authMethods =
+        authMethods != null ? List.copyOf(authMethods) : List.copyOf(Collections.emptyList());
   }
 
-  public AuthMethod[] getAuthMethods() {
-    return authMethods.clone();
+  public List<AuthMethod> getAuthMethods() {
+    return authMethods;
   }
 }

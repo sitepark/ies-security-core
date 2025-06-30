@@ -5,6 +5,7 @@ import com.sitepark.ies.security.core.usecase.authentication.AuthenticationInfo;
 import com.sitepark.ies.sharedkernel.security.AuthMethod;
 import com.sitepark.ies.sharedkernel.security.User;
 import jakarta.inject.Inject;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -42,7 +43,7 @@ public class IdentifyUserUseCase {
 
   public AuthenticationInfo identifyUser(String username) {
     Optional<User> user = this.userRepository.findByUsername(username);
-    return user.map(value -> new AuthenticationInfo(value.getAuthMethods()))
-        .orElseGet(() -> new AuthenticationInfo(DEFAULT_AUTH_METHODS));
+    return user.map(value -> new AuthenticationInfo(value.authMethods()))
+        .orElseGet(() -> new AuthenticationInfo(List.of(DEFAULT_AUTH_METHODS)));
   }
 }

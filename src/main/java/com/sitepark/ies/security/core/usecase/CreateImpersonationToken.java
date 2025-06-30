@@ -36,8 +36,8 @@ public class CreateImpersonationToken {
       throw new AccessDeniedException("Not allowed manage impersonation tokens");
     }
 
-    if (this.userService.findById(accessToken.getUser()).isEmpty()) {
-      throw new InvalidAccessTokenException("user " + accessToken.getUser() + " not found");
+    if (this.userService.findById(accessToken.user()).isEmpty()) {
+      throw new InvalidAccessTokenException("user " + accessToken.user() + " not found");
     }
 
     if (LOGGER.isInfoEnabled()) {

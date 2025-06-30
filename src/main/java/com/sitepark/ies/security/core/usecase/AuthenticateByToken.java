@@ -9,10 +9,13 @@ import com.sitepark.ies.security.core.port.AccessTokenRepository;
 import com.sitepark.ies.security.core.port.UserService;
 import com.sitepark.ies.sharedkernel.security.User;
 import jakarta.inject.Inject;
-import java.time.OffsetDateTime;
+import java.time.Clock;
+import java.time.Instant;
 import java.util.Optional;
 
 public class AuthenticateByToken {
+
+  private final Clock clock;
 
   private final AccessTokenRepository accessTokenRepository;
 
@@ -20,44 +23,45 @@ public class AuthenticateByToken {
 
   @Inject
   protected AuthenticateByToken(
-      AccessTokenRepository accessTokenRepository, UserService userService) {
+      Clock clock, AccessTokenRepository accessTokenRepository, UserService userService) {
+    this.clock = clock;
     this.accessTokenRepository = accessTokenRepository;
     this.userService = userService;
   }
 
   public User authenticateByToken(String token) {
 
-    Optional<AccessToken> accessTokenOptinal = this.accessTokenRepository.getByToken(token);
-    if (accessTokenOptinal.isEmpty()) {
+    Optional<AccessToken> accessTokenOpt = this.accessTokenRepository.getByToken(token);
+    if (accessTokenOpt.isEmpty()) {
       throw new InvalidAccessTokenException("Token not found");
     }
 
-    AccessToken accessToken = accessTokenOptinal.get();
-    if (!accessToken.isActive()) {
+    AccessToken accessToken = accessTokenOpt.get();
+    if (!accessToken.active()) {
       throw new AccessTokenNotActiveException();
     }
-    if (accessToken.isRevoked()) {
+    if (accessToken.revoked()) {
       throw new AccessTokenRevokedException();
     }
-    this.checkExpirationDate(accessToken.getExpiresAt());
+    this.checkExpirationDate(accessToken.expiresAt());
 
-    Optional<User> user = this.userService.findById(accessToken.getUser());
+    Optional<User> user = this.userService.findById(accessToken.user());
     if (user.isEmpty()) {
-      throw new InvalidAccessTokenException("User " + accessToken.getUser() + " not found");
+      throw new InvalidAccessTokenException("User " + accessToken.user() + " not found");
     }
 
     return user.get();
   }
 
-  public void checkExpirationDate(Optional<OffsetDateTime> expiredAt) {
+  public void checkExpirationDate(Instant expiredAt) {
 
-    if (expiredAt.isEmpty()) {
+    if (expiredAt == null) {
       return;
     }
 
-    OffsetDateTime now = OffsetDateTime.now();
-    if (expiredAt.get().isBefore(now)) {
-      throw new AccessTokenExpiredException(expiredAt.get());
+    Instant now = Instant.now(this.clock);
+    if (expiredAt.isBefore(now)) {
+      throw new AccessTokenExpiredException(expiredAt);
     }
   }
 }

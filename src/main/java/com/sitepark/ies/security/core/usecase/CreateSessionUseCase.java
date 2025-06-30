@@ -24,12 +24,16 @@ public class CreateSessionUseCase {
 
   public String createSession(AuthenticatedUser user, String purpose) {
 
-    List<Permission> permissions = this.permissionLoader.loadByUser(user.getId());
+    List<Permission> permissions = this.permissionLoader.loadByUser(user.id());
 
     UserBasedAuthentication authentication =
-        new UserBasedAuthentication(user.toBuilder().build(), permissions, purpose);
+        UserBasedAuthentication.builder()
+            .user(user.toBuilder().build())
+            .permissions(permissions)
+            .purpose(purpose)
+            .build();
 
     Session session = this.sessionRegistry.create(authentication);
-    return session.getId();
+    return session.id();
   }
 }

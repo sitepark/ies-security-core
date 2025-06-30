@@ -1,18 +1,21 @@
 package com.sitepark.ies.security.core.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sitepark.ies.sharedkernel.base.Identifier;
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /** An access token enables authentication as a user without specifying a username and password. */
 @JsonDeserialize(builder = AccessToken.Builder.class)
-@SuppressWarnings("PMD.DataClass")
+@SuppressWarnings({"PMD.DataClass", "PMD.AvoidFieldNameMatchingMethodName", "PMD.TooManyMethods"})
 public final class AccessToken {
 
   private final String id;
@@ -23,11 +26,11 @@ public final class AccessToken {
 
   private final String token;
 
-  private final OffsetDateTime createdAt;
+  private final Instant createdAt;
 
-  private final OffsetDateTime expiresAt;
+  private final Instant expiresAt;
 
-  private final OffsetDateTime lastUsed;
+  private final Instant lastUsed;
 
   private final List<String> scopeList;
 
@@ -37,7 +40,7 @@ public final class AccessToken {
 
   private final boolean revoked;
 
-  protected AccessToken(Builder builder) {
+  private AccessToken(Builder builder) {
     this.id = builder.id;
     this.user = builder.user;
     this.name = builder.name;
@@ -51,50 +54,68 @@ public final class AccessToken {
     this.revoked = builder.revoked;
   }
 
-  public Optional<String> getId() {
+  @JsonProperty
+  public Optional<String> id() {
     if (this.id == null) {
       return Optional.empty();
     }
     return Optional.of(this.id);
   }
 
-  public String getUser() {
+  @NotNull
+  @JsonProperty
+  public String user() {
     return this.user;
   }
 
-  public String getName() {
+  @NotNull
+  @JsonProperty
+  public String name() {
     return this.name;
   }
 
-  public Optional<String> getToken() {
-    return Optional.ofNullable(this.token);
+  @Nullable
+  @JsonProperty
+  public String token() {
+    return this.token;
   }
 
-  public Optional<OffsetDateTime> getCreatedAt() {
-    return Optional.ofNullable(this.createdAt);
+  @Nullable
+  @JsonProperty
+  public Instant createdAt() {
+    return this.createdAt;
   }
 
-  public Optional<OffsetDateTime> getExpiresAt() {
-    return Optional.ofNullable(this.expiresAt);
+  @Nullable
+  @JsonProperty
+  public Instant expiresAt() {
+    return this.expiresAt;
   }
 
-  public Optional<OffsetDateTime> getLastUsed() {
-    return Optional.ofNullable(this.lastUsed);
+  @Nullable
+  @JsonProperty
+  public Instant lastUsed() {
+    return this.lastUsed;
   }
 
-  public List<String> getScopeList() {
+  @NotNull
+  @JsonProperty
+  public List<String> scopeList() {
     return this.scopeList;
   }
 
-  public boolean isImpersonation() {
+  @JsonProperty
+  public boolean impersonation() {
     return this.impersonation;
   }
 
-  public boolean isActive() {
+  @JsonProperty
+  public boolean active() {
     return this.active;
   }
 
-  public boolean isRevoked() {
+  @JsonProperty
+  public boolean revoked() {
     return this.revoked;
   }
 
@@ -143,7 +164,7 @@ public final class AccessToken {
   }
 
   @SuppressWarnings("PMD.TooManyMethods")
-  @JsonPOJOBuilder(withPrefix = "", buildMethodName = "build")
+  @JsonPOJOBuilder(withPrefix = "")
   public static final class Builder {
 
     private String id;
@@ -154,11 +175,11 @@ public final class AccessToken {
 
     private String token;
 
-    private OffsetDateTime createdAt;
+    private Instant createdAt;
 
-    private OffsetDateTime expiresAt;
+    private Instant expiresAt;
 
-    private OffsetDateTime lastUsed;
+    private Instant lastUsed;
 
     private final List<String> scopeList = new ArrayList<>();
 
@@ -168,9 +189,9 @@ public final class AccessToken {
 
     private boolean revoked;
 
-    protected Builder() {}
+    private Builder() {}
 
-    protected Builder(AccessToken accessToken) {
+    private Builder(AccessToken accessToken) {
       this.id = accessToken.id;
       this.user = accessToken.user;
       this.name = accessToken.name;
@@ -216,19 +237,19 @@ public final class AccessToken {
       return this;
     }
 
-    public Builder createdAt(OffsetDateTime createdAt) {
+    public Builder createdAt(Instant createdAt) {
       Objects.requireNonNull(createdAt, "createdAt is null");
       this.createdAt = createdAt;
       return this;
     }
 
-    public Builder expiresAt(OffsetDateTime expiresAt) {
+    public Builder expiresAt(Instant expiresAt) {
       Objects.requireNonNull(expiresAt, "expiresAt is null");
       this.expiresAt = expiresAt;
       return this;
     }
 
-    public Builder lastUsed(OffsetDateTime lastUsed) {
+    public Builder lastUsed(Instant lastUsed) {
       Objects.requireNonNull(lastUsed, "lastUsed is null");
       this.lastUsed = lastUsed;
       return this;
@@ -276,14 +297,8 @@ public final class AccessToken {
     }
 
     public AccessToken build() {
-
-      if (this.user == null) {
-        throw new IllegalStateException("user is not set");
-      }
-      if (this.name == null) {
-        throw new IllegalStateException("name is not set");
-      }
-
+      Objects.requireNonNull(this.user, "user is null");
+      Objects.requireNonNull(this.name, "name is null");
       return new AccessToken(this);
     }
 

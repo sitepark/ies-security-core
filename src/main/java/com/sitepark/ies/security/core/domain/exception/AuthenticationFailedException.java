@@ -29,7 +29,7 @@ public class AuthenticationFailedException extends RuntimeException {
   }
 
   public AuthenticationFailedException(Authentication authentication, Throwable t) {
-    super("Authentication failed: " + authentication.getName(), t);
+    super("Authentication failed: " + authentication.name(), t);
     this.authentication = authentication;
   }
 
