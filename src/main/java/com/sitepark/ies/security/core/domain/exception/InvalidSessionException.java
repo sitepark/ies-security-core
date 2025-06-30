@@ -6,18 +6,18 @@ public class InvalidSessionException extends RuntimeException {
 
   @Serial private static final long serialVersionUID = 1L;
 
-  private final long session;
+  private final String session;
 
-  public InvalidSessionException(long session) {
+  public InvalidSessionException(String session) {
     this(session, null);
   }
 
-  public InvalidSessionException(long session, Throwable t) {
+  public InvalidSessionException(String session, Throwable t) {
     super("Invalid session " + session, t);
     this.session = session;
   }
 
-  public long getSession() {
+  public String getSession() {
     return this.session;
   }
 }

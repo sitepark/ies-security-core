@@ -2,28 +2,34 @@ package com.sitepark.ies.security.core.domain.entity;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
-import com.sitepark.ies.sharedkernel.security.Authentication;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.time.Instant;
 import java.util.Objects;
 
 @JsonDeserialize(builder = Session.Builder.class)
+@SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
 public final class Session {
 
-  private final long id;
+  private final String id;
 
-  private final Authentication authentication;
+  private final Instant createdAt;
+
+  private final UserBasedAuthentication authentication;
 
   private Session(Builder builder) {
     this.id = builder.id;
+    this.createdAt = builder.createdAt;
     this.authentication = builder.authentication;
   }
 
-  public long getId() {
+  public String id() {
     return this.id;
   }
 
-  @SuppressFBWarnings("EI_EXPOSE_REP") // TODO
-  public Authentication getAuthentication() {
+  public Instant createdAt() {
+    return this.createdAt;
+  }
+
+  public UserBasedAuthentication authentication() {
     return this.authentication;
   }
 
@@ -36,34 +42,66 @@ public final class Session {
   }
 
   @Override
-  public String toString() {
-    return this.id + " [" + this.authentication + "]";
+  public int hashCode() {
+    return Objects.hash(id, createdAt, authentication);
   }
 
-  @JsonPOJOBuilder(withPrefix = "", buildMethodName = "build")
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof Session that)) {
+      return false;
+    }
+    return Objects.equals(id, that.id)
+        && Objects.equals(createdAt, that.createdAt)
+        && Objects.equals(authentication, that.authentication);
+  }
+
+  @Override
+  public String toString() {
+    return "Session{"
+        + "id='"
+        + id
+        + '\''
+        + ", createdAt="
+        + createdAt
+        + ", authentication="
+        + authentication
+        + '}';
+  }
+
+  @JsonPOJOBuilder(withPrefix = "")
   public static final class Builder {
 
-    private long id;
+    private String id;
 
-    private Authentication authentication;
+    private Instant createdAt;
+
+    private UserBasedAuthentication authentication;
 
     private Builder() {}
 
     private Builder(Session session) {
       this.id = session.id;
+      this.createdAt = session.createdAt;
       this.authentication = session.authentication;
     }
 
-    public Builder id(long id) {
-      if (id <= 0) {
+    public Builder id(String id) {
+      Objects.requireNonNull(id, "Session ID cannot be null");
+      if (id.isBlank()) {
         throw new IllegalArgumentException("Session ID must be greater than 0");
       }
       this.id = id;
       return this;
     }
 
-    @SuppressFBWarnings("EI_EXPOSE_REP2") // TODO
-    public Builder authentication(Authentication authentication) {
+    public Builder createdAt(Instant createdAt) {
+      Objects.requireNonNull(createdAt, "createdAt cannot be null");
+      this.createdAt = createdAt;
+      return this;
+    }
+
+    public Builder authentication(UserBasedAuthentication authentication) {
       Objects.requireNonNull(authentication, "authentication cannot be null");
       this.authentication = authentication;
       return this;
