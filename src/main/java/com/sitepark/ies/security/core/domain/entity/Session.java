@@ -1,11 +1,8 @@
 package com.sitepark.ies.security.core.domain.entity;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import java.time.Instant;
 import java.util.Objects;
 
-@JsonDeserialize(builder = Session.Builder.class)
 @SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
 public final class Session {
 
@@ -69,7 +66,6 @@ public final class Session {
         + '}';
   }
 
-  @JsonPOJOBuilder(withPrefix = "")
   public static final class Builder {
 
     private String id;

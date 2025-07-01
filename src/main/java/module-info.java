@@ -3,6 +3,8 @@ module com.sitepark.ies.security.core {
   exports com.sitepark.ies.security.core.domain.value;
   exports com.sitepark.ies.security.core.domain.exception;
   exports com.sitepark.ies.security.core.port;
+  exports com.sitepark.ies.security.core.usecase;
+  exports com.sitepark.ies.security.core.usecase.authentication;
 
   requires org.apache.logging.log4j;
   requires jakarta.inject;

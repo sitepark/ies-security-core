@@ -1,12 +1,13 @@
 package com.sitepark.ies.security.core.usecase.authentication;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sitepark.ies.security.core.domain.value.AuthenticationRequirement;
 import com.sitepark.ies.security.core.domain.value.AuthenticationStatus;
 import com.sitepark.ies.sharedkernel.security.User;
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.Optional;
 
+@SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
 public final class AuthenticationResult {
 
   private final AuthenticationStatus status;
@@ -74,19 +75,23 @@ public final class AuthenticationResult {
         AuthenticationStatus.FAILURE, null, null, new AuthenticationRequirement[] {});
   }
 
-  public AuthenticationStatus getStatus() {
+  @JsonProperty
+  public AuthenticationStatus status() {
     return status;
   }
 
-  public Optional<User> getUser() {
-    return Optional.ofNullable(user);
+  @JsonProperty
+  public User user() {
+    return user;
   }
 
-  public Optional<String> getAuthProcessId() {
-    return Optional.ofNullable(authProcessId);
+  @JsonProperty
+  public String authProcessId() {
+    return authProcessId;
   }
 
-  public AuthenticationRequirement[] getRequirements() {
+  @JsonProperty
+  public AuthenticationRequirement[] requirements() {
     return requirements.clone();
   }
 }
