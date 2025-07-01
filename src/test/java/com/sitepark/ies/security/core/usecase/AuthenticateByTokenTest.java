@@ -155,7 +155,6 @@ class AuthenticateByTokenTest {
             .firstName("First")
             .lastName("Last")
             .email("test@test.com")
-            .passwordHash("hash")
             .build();
 
     AccessTokenRepository accessTokenRepository = mock();
@@ -187,7 +186,6 @@ class AuthenticateByTokenTest {
             .firstName("First")
             .lastName("Last")
             .email("test@test.com")
-            .passwordHash("hash")
             .build();
 
     AccessTokenRepository accessTokenRepository = mock();

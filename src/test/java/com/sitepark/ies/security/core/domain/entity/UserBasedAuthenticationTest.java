@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.jparams.verifier.tostring.ToStringVerifier;
 import com.sitepark.ies.sharedkernel.security.FullAccess;
+import com.sitepark.ies.sharedkernel.security.User;
 import java.util.List;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,17 +12,12 @@ import org.junit.jupiter.api.Test;
 
 class UserBasedAuthenticationTest {
 
-  private AuthenticatedUser user;
+  private User user;
 
   @BeforeEach
   void setUp() {
     this.user =
-        AuthenticatedUser.builder()
-            .id("1")
-            .username("peterpan")
-            .firstName("Peter")
-            .lastName("Pan")
-            .build();
+        User.builder().id("1").username("peterpan").firstName("Peter").lastName("Pan").build();
   }
 
   @Test

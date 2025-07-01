@@ -1,6 +1,5 @@
 package com.sitepark.ies.security.core.usecase;
 
-import com.sitepark.ies.security.core.domain.entity.AuthenticatedUser;
 import com.sitepark.ies.security.core.domain.value.AuthenticationRequirement;
 import com.sitepark.ies.security.core.domain.value.PartialAuthenticationState;
 import com.sitepark.ies.security.core.port.AuthenticationAttemptLimiter;
@@ -58,16 +57,14 @@ public class PasswordAuthenticationUseCase {
       return AuthenticationResult.failure();
     }
 
-    Optional<User> optUser = validateUser(username, password);
+    Optional<User> optUser = validateUserAndUpgradePassword(username, password);
     if (optUser.isEmpty()) {
       return AuthenticationResult.failure();
     }
     User user = optUser.get();
 
-    upgradePasswordHashIfNeeded(user, password);
-
     if (user.authFactors().isEmpty()) {
-      return AuthenticationResult.success(AuthenticatedUser.fromUser(user));
+      return AuthenticationResult.success(user);
     }
 
     List<AuthenticationRequirement> requirements = getLoginRequirements(user);
@@ -106,26 +103,30 @@ public class PasswordAuthenticationUseCase {
     return true;
   }
 
-  private Optional<User> validateUser(String username, String password) {
+  private Optional<User> validateUserAndUpgradePassword(String username, String password) {
     Optional<User> optUser = this.userService.findByUsername(username);
     if (optUser.isEmpty()) {
       this.loginAttemptLimiter.onFailedLogin(username);
       return Optional.empty();
     }
     User user = optUser.get();
-    if (!passwordEncoder.matches(password, user.passwordHash())) {
+    Optional<String> passwordHash = this.userService.getPasswordHash(user.id());
+    if (passwordHash.isEmpty()) {
       this.loginAttemptLimiter.onFailedLogin(username);
       return Optional.empty();
     }
-    this.loginAttemptLimiter.onSuccessfulLogin(username);
-    return Optional.of(user);
-  }
+    if (!passwordEncoder.matches(password, passwordHash.get())) {
+      this.loginAttemptLimiter.onFailedLogin(username);
+      return Optional.empty();
+    }
 
-  private void upgradePasswordHashIfNeeded(User user, String password) {
-    if (passwordEncoder.upgradeEncoding(user.passwordHash())) {
+    if (passwordEncoder.upgradeEncoding(passwordHash.get())) {
       String upgradedHash = passwordEncoder.encode(password);
       this.userService.upgradePasswordHash(user.username(), upgradedHash);
     }
+
+    this.loginAttemptLimiter.onSuccessfulLogin(username);
+    return Optional.of(user);
   }
 
   private List<AuthenticationRequirement> getLoginRequirements(User user) {

@@ -5,10 +5,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.sitepark.ies.security.core.domain.entity.AuthenticatedUser;
 import com.sitepark.ies.security.core.domain.entity.Session;
 import com.sitepark.ies.security.core.port.PermissionLoader;
 import com.sitepark.ies.security.core.port.SessionRegistry;
+import com.sitepark.ies.sharedkernel.security.User;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,13 +31,8 @@ class CreateSessionUseCaseTest {
   @Test
   void testCreateSession() {
 
-    AuthenticatedUser user =
-        AuthenticatedUser.builder()
-            .id("234")
-            .username("peterpan")
-            .firstName("Peter")
-            .lastName("pan")
-            .build();
+    User user =
+        User.builder().id("234").username("peterpan").firstName("Peter").lastName("pan").build();
 
     Session session = mock();
     when(session.id()).thenReturn("123");

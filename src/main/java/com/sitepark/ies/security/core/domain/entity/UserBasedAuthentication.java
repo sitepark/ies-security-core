@@ -2,6 +2,7 @@ package com.sitepark.ies.security.core.domain.entity;
 
 import com.sitepark.ies.sharedkernel.security.Authentication;
 import com.sitepark.ies.sharedkernel.security.Permission;
+import com.sitepark.ies.sharedkernel.security.User;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -10,7 +11,7 @@ import org.jetbrains.annotations.NotNull;
 @SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
 public final class UserBasedAuthentication implements Authentication {
 
-  private final AuthenticatedUser user;
+  private final User user;
 
   private final List<Permission> permissions;
 
@@ -22,7 +23,7 @@ public final class UserBasedAuthentication implements Authentication {
     this.purpose = builder.purpose;
   }
 
-  public AuthenticatedUser user() {
+  public User user() {
     return user;
   }
 
@@ -78,7 +79,7 @@ public final class UserBasedAuthentication implements Authentication {
 
   public static final class Builder {
 
-    private AuthenticatedUser user;
+    private User user;
 
     private final List<Permission> permissions = new ArrayList<>();
 
@@ -86,7 +87,7 @@ public final class UserBasedAuthentication implements Authentication {
 
     private Builder() {}
 
-    public Builder user(AuthenticatedUser user) {
+    public Builder user(User user) {
       Objects.requireNonNull(user, "user must not be null");
       this.user = user;
       return this;

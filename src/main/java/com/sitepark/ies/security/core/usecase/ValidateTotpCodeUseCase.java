@@ -1,6 +1,5 @@
 package com.sitepark.ies.security.core.usecase;
 
-import com.sitepark.ies.security.core.domain.entity.AuthenticatedUser;
 import com.sitepark.ies.security.core.domain.value.AuthenticationRequirement;
 import com.sitepark.ies.security.core.domain.value.PartialAuthenticationState;
 import com.sitepark.ies.security.core.domain.value.VaultEntryNames;
@@ -62,7 +61,7 @@ public class ValidateTotpCodeUseCase {
             .toArray(AuthenticationRequirement[]::new);
 
     if (remainingRequirements.length == 0) {
-      return AuthenticationResult.success(AuthenticatedUser.fromUser(authState.user()));
+      return AuthenticationResult.success(authState.user());
     }
 
     return AuthenticationResult.partial(authProcessId, remainingRequirements);

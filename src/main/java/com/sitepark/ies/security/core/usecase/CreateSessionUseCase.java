@@ -1,11 +1,11 @@
 package com.sitepark.ies.security.core.usecase;
 
-import com.sitepark.ies.security.core.domain.entity.AuthenticatedUser;
 import com.sitepark.ies.security.core.domain.entity.Session;
 import com.sitepark.ies.security.core.domain.entity.UserBasedAuthentication;
 import com.sitepark.ies.security.core.port.PermissionLoader;
 import com.sitepark.ies.security.core.port.SessionRegistry;
 import com.sitepark.ies.sharedkernel.security.Permission;
+import com.sitepark.ies.sharedkernel.security.User;
 import jakarta.inject.Inject;
 import java.util.List;
 
@@ -22,7 +22,7 @@ public class CreateSessionUseCase {
     this.permissionLoader = permissionLoader;
   }
 
-  public String createSession(AuthenticatedUser user, String purpose) {
+  public String createSession(User user, String purpose) {
 
     List<Permission> permissions = this.permissionLoader.loadByUser(user.id());
 

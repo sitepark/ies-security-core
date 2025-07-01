@@ -59,13 +59,7 @@ class GenerateTotpUrlUseCaseTest {
   void testGenerateTotpUrl() {
     when(this.accessControl.isGenerateTotpUrlAllowed("123")).thenReturn(true);
     User user =
-        User.builder()
-            .id("123")
-            .username("peterpan")
-            .firstName("Peter")
-            .lastName("Pan")
-            .passwordHash("hash")
-            .build();
+        User.builder().id("123").username("peterpan").firstName("Peter").lastName("Pan").build();
     when(this.userService.findById(any())).thenReturn(Optional.of(user));
     when(this.totpProvider.generateSecret()).thenReturn("secret");
 

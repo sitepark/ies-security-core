@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.sitepark.ies.security.core.domain.entity.AuthenticatedUser;
 import com.sitepark.ies.security.core.domain.value.AuthenticationRequirement;
 import com.sitepark.ies.security.core.domain.value.PartialAuthenticationState;
 import com.sitepark.ies.security.core.port.AuthenticationProcessStore;
@@ -67,8 +66,7 @@ class ValidateTotpCodeUseCaseTest {
   @Test
   void testInvalidSecret() {
 
-    User user =
-        User.builder().id("123").username("peterpan").lastName("Pan").passwordHash("hash").build();
+    User user = User.builder().id("123").username("peterpan").lastName("Pan").build();
     PartialAuthenticationState authState =
         new PartialAuthenticationState(
             user,
@@ -91,8 +89,7 @@ class ValidateTotpCodeUseCaseTest {
 
   @Test
   void testSuccess() {
-    User user =
-        User.builder().id("123").username("peterpan").lastName("Pan").passwordHash("hash").build();
+    User user = User.builder().id("123").username("peterpan").lastName("Pan").build();
     PartialAuthenticationState authState =
         new PartialAuthenticationState(
             user,
@@ -107,18 +104,15 @@ class ValidateTotpCodeUseCaseTest {
 
     when(this.totpProvider.validateTotpCode(any(), anyInt())).thenReturn(true);
 
-    AuthenticatedUser expectedUser = AuthenticatedUser.fromUser(user);
-
     assertEquals(
-        AuthenticationResult.success(expectedUser),
+        AuthenticationResult.success(user),
         this.useCase.validateTotpCode("testProcessId", 123456),
         "Expected successful TOTP code validation");
   }
 
   @Test
   void testPartial() {
-    User user =
-        User.builder().id("123").username("peterpan").lastName("Pan").passwordHash("hash").build();
+    User user = User.builder().id("123").username("peterpan").lastName("Pan").build();
     PartialAuthenticationState authState =
         new PartialAuthenticationState(
             user,

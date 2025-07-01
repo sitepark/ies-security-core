@@ -1,8 +1,8 @@
 package com.sitepark.ies.security.core.usecase.authentication;
 
-import com.sitepark.ies.security.core.domain.entity.AuthenticatedUser;
 import com.sitepark.ies.security.core.domain.value.AuthenticationRequirement;
 import com.sitepark.ies.security.core.domain.value.AuthenticationStatus;
+import com.sitepark.ies.sharedkernel.security.User;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
@@ -10,14 +10,14 @@ import java.util.Optional;
 public final class AuthenticationResult {
 
   private final AuthenticationStatus status;
-  private final AuthenticatedUser user;
+  private final User user;
   private final String authProcessId; // für PARTIAL-Logins
   private final AuthenticationRequirement[] requirements;
 
   @SuppressWarnings("PMD.UseVarargs")
   private AuthenticationResult(
       AuthenticationStatus status,
-      AuthenticatedUser user,
+      User user,
       String authProcessId,
       AuthenticationRequirement[] requirements) {
     this.status = status;
@@ -57,7 +57,7 @@ public final class AuthenticationResult {
         + '}';
   }
 
-  public static AuthenticationResult success(AuthenticatedUser user) {
+  public static AuthenticationResult success(User user) {
     return new AuthenticationResult(
         AuthenticationStatus.SUCCESS, user, null, new AuthenticationRequirement[] {});
   }
@@ -78,7 +78,7 @@ public final class AuthenticationResult {
     return status;
   }
 
-  public Optional<AuthenticatedUser> getUser() {
+  public Optional<User> getUser() {
     return Optional.ofNullable(user);
   }
 

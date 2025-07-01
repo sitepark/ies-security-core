@@ -6,7 +6,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.sitepark.ies.security.core.domain.entity.AuthenticatedUser;
 import com.sitepark.ies.security.core.domain.value.AuthenticationRequirement;
 import com.sitepark.ies.security.core.domain.value.PartialAuthenticationState;
 import com.sitepark.ies.security.core.port.AuthenticationAttemptLimiter;
@@ -76,7 +75,7 @@ class PasswordAuthenticationUseCaseTest {
   }
 
   @Test
-  void testFailurePasswordNotMatch() {
+  void testFailureUserHasNoPassword() {
     when(this.loginAttemptLimiter.accept(any())).thenReturn(true);
     User user = mock();
     when(this.userService.findByUsername(any())).thenReturn(Optional.of(user));
@@ -85,21 +84,33 @@ class PasswordAuthenticationUseCaseTest {
     assertEquals(
         AuthenticationResult.failure(),
         this.useCase.passwordAuthentication("username", "password", "purpose"),
-        "Expected failure due to exceeded login attempts");
+        "Expected failure due to user having no password");
+  }
+
+  @Test
+  void testFailurePasswordNotMatch() {
+    when(this.loginAttemptLimiter.accept(any())).thenReturn(true);
+    User user = mock();
+    when(this.userService.findByUsername(any())).thenReturn(Optional.of(user));
+    when(this.userService.getPasswordHash(any())).thenReturn(Optional.of("hashedPassword"));
+    when(this.passwordEncoder.matches(any(), any())).thenReturn(false);
+
+    assertEquals(
+        AuthenticationResult.failure(),
+        this.useCase.passwordAuthentication("username", "password", "purpose"),
+        "Expected failure due to password not matching");
   }
 
   @Test
   void testSuccessWithoutAdditionalFactor() {
     when(this.loginAttemptLimiter.accept(any())).thenReturn(true);
-    User user =
-        User.builder().id("1").username("username").lastName("Test").passwordHash("hash").build();
+    User user = User.builder().id("1").username("username").lastName("Test").build();
     when(this.userService.findByUsername(any())).thenReturn(Optional.of(user));
+    when(this.userService.getPasswordHash(any())).thenReturn(Optional.of("hashedPassword"));
     when(this.passwordEncoder.matches(any(), any())).thenReturn(true);
 
-    AuthenticatedUser authenticatedUser = AuthenticatedUser.fromUser(user);
-
     assertEquals(
-        AuthenticationResult.success(authenticatedUser),
+        AuthenticationResult.success(user),
         this.useCase.passwordAuthentication("username", "password", "purpose"),
         "Expected successful authentication without additional factors");
   }
@@ -107,9 +118,9 @@ class PasswordAuthenticationUseCaseTest {
   @Test
   void testSuccessWithUpgradePassword() {
     when(this.loginAttemptLimiter.accept(any())).thenReturn(true);
-    User user =
-        User.builder().id("1").username("username").lastName("Test").passwordHash("hash").build();
+    User user = User.builder().id("1").username("username").lastName("Test").build();
     when(this.userService.findByUsername("username")).thenReturn(Optional.of(user));
+    when(this.userService.getPasswordHash(any())).thenReturn(Optional.of("hashedPassword"));
     when(this.passwordEncoder.matches(any(), any())).thenReturn(true);
     when(this.passwordEncoder.upgradeEncoding(any())).thenReturn(true);
     when(this.passwordEncoder.encode(any())).thenReturn("hash");
@@ -129,9 +140,9 @@ class PasswordAuthenticationUseCaseTest {
             .username("username")
             .lastName("Test")
             .authFactors(AuthFactor.TOTP)
-            .passwordHash("hash")
             .build();
     when(this.userService.findByUsername(any())).thenReturn(Optional.of(user));
+    when(this.userService.getPasswordHash(any())).thenReturn(Optional.of("hashedPassword"));
     when(this.passwordEncoder.matches(any(), any())).thenReturn(true);
     when(this.authenticationProcessStore.store(any())).thenReturn("123");
     AuthenticationRequirement[] requirements =
