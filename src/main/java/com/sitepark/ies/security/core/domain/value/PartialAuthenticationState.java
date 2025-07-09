@@ -7,14 +7,23 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public record PartialAuthenticationState(
-    User user, AuthMethod method, AuthenticationRequirement[] requirements, Instant createdAt) {
+    User user,
+    AuthMethod method,
+    AuthenticationRequirement[] requirements,
+    Instant createdAt,
+    String purpose) {
   public PartialAuthenticationState(
-      User user, AuthMethod method, AuthenticationRequirement[] requirements, Instant createdAt) {
+      User user,
+      AuthMethod method,
+      AuthenticationRequirement[] requirements,
+      Instant createdAt,
+      String purpose) {
     this.user = user;
     this.method = method;
     this.requirements =
         requirements != null ? requirements.clone() : new AuthenticationRequirement[] {};
     this.createdAt = createdAt;
+    this.purpose = purpose;
   }
 
   @Override
@@ -24,7 +33,7 @@ public record PartialAuthenticationState(
 
   @Override
   public int hashCode() {
-    return Objects.hash(user, method, Arrays.hashCode(requirements), createdAt);
+    return Objects.hash(user, method, Arrays.hashCode(requirements), createdAt, purpose);
   }
 
   @Override
@@ -35,7 +44,8 @@ public record PartialAuthenticationState(
     return Objects.equals(this.user, that.user)
         && Objects.equals(this.method, that.method)
         && Arrays.equals(this.requirements, that.requirements)
-        && Objects.equals(this.createdAt, that.createdAt);
+        && Objects.equals(this.createdAt, that.createdAt)
+        && Objects.equals(this.purpose, that.purpose);
   }
 
   @Override
@@ -49,6 +59,9 @@ public record PartialAuthenticationState(
         + Arrays.toString(requirements)
         + ", createdAt="
         + createdAt
+        + ", purpose='"
+        + purpose
+        + '\''
         + '}';
   }
 }

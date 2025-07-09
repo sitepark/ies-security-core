@@ -1,9 +1,6 @@
 package com.sitepark.ies.security.core.domain.entity;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -115,13 +112,13 @@ class AccessTokenTest {
   @Test
   void testSetId() throws JsonProcessingException {
     AccessToken accessToken = this.createBuilderWithRequiredValues().id("123").build();
-    assertEquals("123", accessToken.id().get(), "wrong id");
+    assertEquals("123", accessToken.id(), "wrong id");
   }
 
   @Test
   void testGetEmptyId() throws JsonProcessingException {
     AccessToken accessToken = this.createBuilderWithRequiredValues().build();
-    assertTrue(accessToken.id().isEmpty(), "id should be empty");
+    assertNull(accessToken.id(), "id should be null");
   }
 
   @Test

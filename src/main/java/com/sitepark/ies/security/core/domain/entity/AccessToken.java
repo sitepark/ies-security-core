@@ -9,8 +9,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /** An access token enables authentication as a user without specifying a username and password. */
@@ -55,20 +53,15 @@ public final class AccessToken {
   }
 
   @JsonProperty
-  public Optional<String> id() {
-    if (this.id == null) {
-      return Optional.empty();
-    }
-    return Optional.of(this.id);
+  public String id() {
+    return this.id;
   }
 
-  @NotNull
   @JsonProperty
   public String user() {
     return this.user;
   }
 
-  @NotNull
   @JsonProperty
   public String name() {
     return this.name;
@@ -98,10 +91,9 @@ public final class AccessToken {
     return this.lastUsed;
   }
 
-  @NotNull
   @JsonProperty
   public List<String> scopeList() {
-    return this.scopeList;
+    return List.copyOf(this.scopeList);
   }
 
   @JsonProperty

@@ -20,7 +20,7 @@ class PartialAuthenticationStateTest {
 
   @Test
   void testSetNullRequirement() {
-    PartialAuthenticationState state = new PartialAuthenticationState(null, null, null, null);
+    PartialAuthenticationState state = new PartialAuthenticationState(null, null, null, null, null);
     assertNotNull(state.requirements(), "Requirements should not be null");
   }
 
@@ -29,7 +29,7 @@ class PartialAuthenticationStateTest {
     AuthenticationRequirement[] requirements =
         new AuthenticationRequirement[] {AuthenticationRequirement.TOTP_CODE_REQUIRED};
     PartialAuthenticationState state =
-        new PartialAuthenticationState(null, null, requirements, null);
+        new PartialAuthenticationState(null, null, requirements, null, null);
 
     requirements[0] = AuthenticationRequirement.PASSKEY_CHALLENGE_REQUIRED;
 

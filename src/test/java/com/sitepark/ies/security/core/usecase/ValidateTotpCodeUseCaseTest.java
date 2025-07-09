@@ -8,7 +8,7 @@ import static org.mockito.Mockito.when;
 
 import com.sitepark.ies.security.core.domain.value.AuthenticationRequirement;
 import com.sitepark.ies.security.core.domain.value.PartialAuthenticationState;
-import com.sitepark.ies.security.core.port.AuthenticationProcessStore;
+import com.sitepark.ies.security.core.port.MfaAuthenticationProcessStore;
 import com.sitepark.ies.security.core.port.TotpProvider;
 import com.sitepark.ies.security.core.port.Vault;
 import com.sitepark.ies.security.core.port.VaultProvider;
@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 class ValidateTotpCodeUseCaseTest {
   private TotpProvider totpProvider;
   private VaultProvider vaultProvider;
-  private AuthenticationProcessStore authenticationProcessStore;
+  private MfaAuthenticationProcessStore authenticationProcessStore;
 
   private ValidateTotpCodeUseCase useCase;
 
@@ -29,7 +29,7 @@ class ValidateTotpCodeUseCaseTest {
   void setUp() {
     this.totpProvider = mock(TotpProvider.class);
     this.vaultProvider = mock(VaultProvider.class);
-    this.authenticationProcessStore = mock(AuthenticationProcessStore.class);
+    this.authenticationProcessStore = mock(MfaAuthenticationProcessStore.class);
 
     this.useCase =
         new ValidateTotpCodeUseCase(totpProvider, vaultProvider, authenticationProcessStore);
@@ -52,6 +52,7 @@ class ValidateTotpCodeUseCaseTest {
             null,
             null,
             new AuthenticationRequirement[] {AuthenticationRequirement.PASSKEY_CHALLENGE_REQUIRED},
+            null,
             null);
 
     when(this.authenticationProcessStore.retrieve(any())).thenReturn(Optional.of(authState));
@@ -72,6 +73,7 @@ class ValidateTotpCodeUseCaseTest {
             user,
             null,
             new AuthenticationRequirement[] {AuthenticationRequirement.TOTP_CODE_REQUIRED},
+            null,
             null);
 
     Vault userVault = mock();
@@ -95,7 +97,8 @@ class ValidateTotpCodeUseCaseTest {
             user,
             null,
             new AuthenticationRequirement[] {AuthenticationRequirement.TOTP_CODE_REQUIRED},
-            null);
+            null,
+            "purpose");
 
     Vault userVault = mock();
     when(this.vaultProvider.getUserVault(any())).thenReturn(userVault);
@@ -105,7 +108,7 @@ class ValidateTotpCodeUseCaseTest {
     when(this.totpProvider.validateTotpCode(any(), anyInt())).thenReturn(true);
 
     assertEquals(
-        AuthenticationResult.success(user),
+        AuthenticationResult.success(user, "purpose"),
         this.useCase.validateTotpCode("testProcessId", 123456),
         "Expected successful TOTP code validation");
   }
@@ -121,6 +124,7 @@ class ValidateTotpCodeUseCaseTest {
               AuthenticationRequirement.TOTP_CODE_REQUIRED,
               AuthenticationRequirement.PASSKEY_CHALLENGE_REQUIRED
             },
+            null,
             null);
 
     Vault userVault = mock();

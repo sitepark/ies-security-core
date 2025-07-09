@@ -11,13 +11,15 @@ import org.jetbrains.annotations.NotNull;
 @SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
 public final class UserBasedAuthentication implements Authentication {
 
-  private final User user;
+  @NotNull private final User user;
 
-  private final List<Permission> permissions;
+  @NotNull private final List<Permission> permissions;
 
-  private final String purpose;
+  @NotNull private final String purpose;
 
   private UserBasedAuthentication(Builder builder) {
+    Objects.requireNonNull(builder.user, "user must not be null");
+    Objects.requireNonNull(builder.purpose, "purpose must not be null");
     this.user = builder.user;
     this.permissions = List.copyOf(builder.permissions);
     this.purpose = builder.purpose;
@@ -28,21 +30,18 @@ public final class UserBasedAuthentication implements Authentication {
   }
 
   @Override
-  @NotNull
   public String name() {
     return user.getName();
   }
 
   @Override
-  @NotNull
   public String purpose() {
     return purpose;
   }
 
   @Override
-  @NotNull
   public List<Permission> permissions() {
-    return this.permissions;
+    return List.copyOf(this.permissions);
   }
 
   @Override
@@ -113,8 +112,6 @@ public final class UserBasedAuthentication implements Authentication {
     }
 
     public UserBasedAuthentication build() {
-      Objects.requireNonNull(user, "user must not be null");
-      Objects.requireNonNull(purpose, "purpose must not be null");
       return new UserBasedAuthentication(this);
     }
   }

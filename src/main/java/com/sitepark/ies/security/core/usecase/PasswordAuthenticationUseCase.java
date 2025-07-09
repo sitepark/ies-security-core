@@ -3,7 +3,7 @@ package com.sitepark.ies.security.core.usecase;
 import com.sitepark.ies.security.core.domain.value.AuthenticationRequirement;
 import com.sitepark.ies.security.core.domain.value.PartialAuthenticationState;
 import com.sitepark.ies.security.core.port.AuthenticationAttemptLimiter;
-import com.sitepark.ies.security.core.port.AuthenticationProcessStore;
+import com.sitepark.ies.security.core.port.MfaAuthenticationProcessStore;
 import com.sitepark.ies.security.core.port.UserService;
 import com.sitepark.ies.security.core.usecase.authentication.AuthenticationResult;
 import com.sitepark.ies.sharedkernel.security.AuthFactor;
@@ -31,7 +31,7 @@ public class PasswordAuthenticationUseCase {
 
   private final AuthenticationAttemptLimiter loginAttemptLimiter;
 
-  private final AuthenticationProcessStore authenticationProcessStore;
+  private final MfaAuthenticationProcessStore authenticationProcessStore;
 
   private final Logger LOGGER = LogManager.getLogger();
 
@@ -42,7 +42,7 @@ public class PasswordAuthenticationUseCase {
       UserService userService,
       PasswordEncoder passwordEncoder,
       AuthenticationAttemptLimiter loginAttemptLimiter,
-      AuthenticationProcessStore authenticationSessionStore) {
+      MfaAuthenticationProcessStore authenticationSessionStore) {
     this.clock = clock;
     this.userService = userService;
     this.passwordEncoder = passwordEncoder;
@@ -64,7 +64,7 @@ public class PasswordAuthenticationUseCase {
     User user = optUser.get();
 
     if (user.authFactors().isEmpty()) {
-      return AuthenticationResult.success(user);
+      return AuthenticationResult.success(user, purpose);
     }
 
     List<AuthenticationRequirement> requirements = getLoginRequirements(user);
@@ -75,7 +75,8 @@ public class PasswordAuthenticationUseCase {
                 user,
                 AuthMethod.PASSWORD,
                 requirements.toArray(AuthenticationRequirement[]::new),
-                Instant.now(this.clock)));
+                Instant.now(this.clock),
+                purpose));
 
     return AuthenticationResult.partial(
         authProcessId, requirements.toArray(AuthenticationRequirement[]::new));
