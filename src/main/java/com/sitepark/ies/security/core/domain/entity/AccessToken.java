@@ -9,6 +9,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /** An access token enables authentication as a user without specifying a username and password. */
@@ -18,19 +19,19 @@ public final class AccessToken {
 
   private final String id;
 
-  private final String user;
+  @NotNull private final String user;
 
-  private final String name;
+  @NotNull private final String name;
 
-  private final String token;
+  @Nullable private final String token;
 
-  private final Instant createdAt;
+  @Nullable private final Instant createdAt;
 
-  private final Instant expiresAt;
+  @Nullable private final Instant expiresAt;
 
-  private final Instant lastUsed;
+  @Nullable private final Instant lastUsed;
 
-  private final List<String> scopeList;
+  @NotNull private final List<String> scopeList;
 
   private final boolean impersonation;
 
@@ -50,6 +51,9 @@ public final class AccessToken {
     this.impersonation = builder.impersonation;
     this.active = builder.active;
     this.revoked = builder.revoked;
+
+    Objects.requireNonNull(this.user, "user is null");
+    Objects.requireNonNull(this.name, "name is null");
   }
 
   @JsonProperty
@@ -67,25 +71,21 @@ public final class AccessToken {
     return this.name;
   }
 
-  @Nullable
   @JsonProperty
   public String token() {
     return this.token;
   }
 
-  @Nullable
   @JsonProperty
   public Instant createdAt() {
     return this.createdAt;
   }
 
-  @Nullable
   @JsonProperty
   public Instant expiresAt() {
     return this.expiresAt;
   }
 
-  @Nullable
   @JsonProperty
   public Instant lastUsed() {
     return this.lastUsed;
@@ -289,8 +289,6 @@ public final class AccessToken {
     }
 
     public AccessToken build() {
-      Objects.requireNonNull(this.user, "user is null");
-      Objects.requireNonNull(this.name, "name is null");
       return new AccessToken(this);
     }
 
