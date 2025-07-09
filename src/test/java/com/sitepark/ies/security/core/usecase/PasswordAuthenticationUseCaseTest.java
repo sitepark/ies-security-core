@@ -9,7 +9,7 @@ import static org.mockito.Mockito.when;
 import com.sitepark.ies.security.core.domain.value.AuthenticationRequirement;
 import com.sitepark.ies.security.core.domain.value.PartialAuthenticationState;
 import com.sitepark.ies.security.core.port.AuthenticationAttemptLimiter;
-import com.sitepark.ies.security.core.port.AuthenticationProcessStore;
+import com.sitepark.ies.security.core.port.MfaAuthenticationProcessStore;
 import com.sitepark.ies.security.core.port.UserService;
 import com.sitepark.ies.security.core.usecase.authentication.AuthenticationResult;
 import com.sitepark.ies.sharedkernel.security.AuthFactor;
@@ -32,7 +32,7 @@ class PasswordAuthenticationUseCaseTest {
   private UserService userService;
   private PasswordEncoder passwordEncoder;
   private AuthenticationAttemptLimiter loginAttemptLimiter;
-  private AuthenticationProcessStore authenticationProcessStore;
+  private MfaAuthenticationProcessStore authenticationProcessStore;
   private PasswordAuthenticationUseCase useCase;
 
   @BeforeEach
@@ -40,7 +40,7 @@ class PasswordAuthenticationUseCaseTest {
     userService = mock(UserService.class);
     passwordEncoder = mock(PasswordEncoder.class);
     loginAttemptLimiter = mock(AuthenticationAttemptLimiter.class);
-    authenticationProcessStore = mock(AuthenticationProcessStore.class);
+    authenticationProcessStore = mock(MfaAuthenticationProcessStore.class);
 
     useCase =
         new PasswordAuthenticationUseCase(
@@ -110,7 +110,7 @@ class PasswordAuthenticationUseCaseTest {
     when(this.passwordEncoder.matches(any(), any())).thenReturn(true);
 
     assertEquals(
-        AuthenticationResult.success(user),
+        AuthenticationResult.success(user, "purpose"),
         this.useCase.passwordAuthentication("username", "password", "purpose"),
         "Expected successful authentication without additional factors");
   }
@@ -152,7 +152,7 @@ class PasswordAuthenticationUseCaseTest {
 
     PartialAuthenticationState expectedPartialState =
         new PartialAuthenticationState(
-            user, AuthMethod.PASSWORD, requirements, Instant.now(this.fixedClock));
+            user, AuthMethod.PASSWORD, requirements, Instant.now(this.fixedClock), "purpose");
 
     assertEquals(
         expectedResult,

@@ -7,29 +7,31 @@ import com.sitepark.ies.sharedkernel.security.User;
 import java.util.Arrays;
 import java.util.Objects;
 
-@SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
+@SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName", "PMD.TooManyMethods"})
 public final class AuthenticationResult {
 
   private final AuthenticationStatus status;
   private final User user;
   private final String authProcessId; // für PARTIAL-Logins
   private final AuthenticationRequirement[] requirements;
+  private final String purpose;
 
-  @SuppressWarnings("PMD.UseVarargs")
   private AuthenticationResult(
       AuthenticationStatus status,
       User user,
       String authProcessId,
-      AuthenticationRequirement[] requirements) {
+      AuthenticationRequirement[] requirements,
+      String purpose) {
     this.status = status;
     this.user = user;
     this.authProcessId = authProcessId;
     this.requirements = requirements != null ? requirements : new AuthenticationRequirement[] {};
+    this.purpose = purpose;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(status, user, authProcessId, Arrays.hashCode(requirements));
+    return Objects.hash(status, user, authProcessId, Arrays.hashCode(requirements), purpose);
   }
 
   @Override
@@ -40,7 +42,8 @@ public final class AuthenticationResult {
     return Objects.equals(this.status, that.status)
         && Objects.equals(this.user, that.user)
         && Objects.equals(this.authProcessId, that.authProcessId)
-        && Arrays.equals(this.requirements, that.requirements);
+        && Arrays.equals(this.requirements, that.requirements)
+        && Objects.equals(this.purpose, that.purpose);
   }
 
   @Override
@@ -55,24 +58,27 @@ public final class AuthenticationResult {
         + '\''
         + ", requirements="
         + Arrays.toString(requirements)
+        + ", purpose='"
+        + purpose
+        + '\''
         + '}';
   }
 
-  public static AuthenticationResult success(User user) {
+  public static AuthenticationResult success(User user, String purpose) {
     return new AuthenticationResult(
-        AuthenticationStatus.SUCCESS, user, null, new AuthenticationRequirement[] {});
+        AuthenticationStatus.SUCCESS, user, null, new AuthenticationRequirement[] {}, purpose);
   }
 
   @SuppressWarnings("PMD.UseVarargs")
   public static AuthenticationResult partial(
       String authProcessId, AuthenticationRequirement[] requirements) {
     return new AuthenticationResult(
-        AuthenticationStatus.PARTIAL, null, authProcessId, requirements);
+        AuthenticationStatus.PARTIAL, null, authProcessId, requirements, null);
   }
 
   public static AuthenticationResult failure() {
     return new AuthenticationResult(
-        AuthenticationStatus.FAILURE, null, null, new AuthenticationRequirement[] {});
+        AuthenticationStatus.FAILURE, null, null, new AuthenticationRequirement[] {}, null);
   }
 
   @JsonProperty
@@ -88,6 +94,11 @@ public final class AuthenticationResult {
   @JsonProperty
   public String authProcessId() {
     return authProcessId;
+  }
+
+  @JsonProperty
+  public String purpose() {
+    return purpose;
   }
 
   @JsonProperty

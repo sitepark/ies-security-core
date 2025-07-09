@@ -35,7 +35,7 @@ class SessionTest {
   void testIdWithNull() {
     assertThrows(
         NullPointerException.class,
-        () -> Session.builder().id(null).build(),
+        () -> Session.builder().id(null),
         "Session id should not be null");
   }
 
@@ -43,7 +43,7 @@ class SessionTest {
   void testIdWithBlankString() {
     assertThrows(
         IllegalArgumentException.class,
-        () -> Session.builder().id(" ").build(),
+        () -> Session.builder().id(" "),
         "Session id should not be blank");
   }
 
@@ -58,7 +58,7 @@ class SessionTest {
   void testCreatedAtWithNull() {
     assertThrows(
         NullPointerException.class,
-        () -> Session.builder().createdAt(null).build(),
+        () -> Session.builder().createdAt(null),
         "Session createdAt should not be null");
   }
 
@@ -76,7 +76,7 @@ class SessionTest {
   void testAuthenticationWithNull() {
     assertThrows(
         NullPointerException.class,
-        () -> Session.builder().authentication(null).build(),
+        () -> Session.builder().authentication(null),
         "Session authentication should not be null");
   }
 

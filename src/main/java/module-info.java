@@ -18,4 +18,5 @@ module com.sitepark.ies.security.core {
 
   opens com.sitepark.ies.security.core.port;
   opens com.sitepark.ies.security.core.domain.entity;
+  opens com.sitepark.ies.security.core.domain.value;
 }

@@ -32,7 +32,7 @@ class AuthenticationResultTest {
   @Test
   void testSuccess() {
     User user = User.builder().id("1").username("test").lastName("test").build();
-    AuthenticationResult result = AuthenticationResult.success(user);
+    AuthenticationResult result = AuthenticationResult.success(user, "purpose");
     assertEquals(AuthenticationStatus.SUCCESS, result.status(), "Unexpected status");
   }
 
@@ -63,11 +63,11 @@ class AuthenticationResultTest {
     ObjectMapper mapper = new ObjectMapper();
     mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
     User user = User.builder().id("1").username("test").lastName("test").build();
-    AuthenticationResult result = AuthenticationResult.success(user);
+    AuthenticationResult result = AuthenticationResult.success(user, "purpose");
     String json = mapper.writeValueAsString(result);
     String expected =
         """
-        {"status":"SUCCESS","user":{"id":"1","username":"test","lastName":"test"}}\
+        {"status":"SUCCESS","user":{"id":"1","username":"test","lastName":"test"},"purpose":"purpose"}\
         """;
 
     assertEquals(expected, json, "JSON serialization should match expected format");

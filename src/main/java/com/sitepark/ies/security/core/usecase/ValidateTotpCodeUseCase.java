@@ -3,7 +3,7 @@ package com.sitepark.ies.security.core.usecase;
 import com.sitepark.ies.security.core.domain.value.AuthenticationRequirement;
 import com.sitepark.ies.security.core.domain.value.PartialAuthenticationState;
 import com.sitepark.ies.security.core.domain.value.VaultEntryNames;
-import com.sitepark.ies.security.core.port.AuthenticationProcessStore;
+import com.sitepark.ies.security.core.port.MfaAuthenticationProcessStore;
 import com.sitepark.ies.security.core.port.TotpProvider;
 import com.sitepark.ies.security.core.port.VaultProvider;
 import com.sitepark.ies.security.core.usecase.authentication.AuthenticationResult;
@@ -14,13 +14,13 @@ public class ValidateTotpCodeUseCase {
 
   private final TotpProvider totpProvider;
   private final VaultProvider vaultProvider;
-  private final AuthenticationProcessStore authenticationProcessStore;
+  private final MfaAuthenticationProcessStore authenticationProcessStore;
 
   @Inject
   protected ValidateTotpCodeUseCase(
       TotpProvider totpProvider,
       VaultProvider vaultProvider,
-      AuthenticationProcessStore authenticationProcessStore) {
+      MfaAuthenticationProcessStore authenticationProcessStore) {
     this.totpProvider = totpProvider;
     this.vaultProvider = vaultProvider;
     this.authenticationProcessStore = authenticationProcessStore;
@@ -61,7 +61,7 @@ public class ValidateTotpCodeUseCase {
             .toArray(AuthenticationRequirement[]::new);
 
     if (remainingRequirements.length == 0) {
-      return AuthenticationResult.success(authState.user());
+      return AuthenticationResult.success(authState.user(), authState.purpose());
     }
 
     return AuthenticationResult.partial(authProcessId, remainingRequirements);

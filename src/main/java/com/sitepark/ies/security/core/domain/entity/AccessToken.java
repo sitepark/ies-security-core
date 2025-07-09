@@ -9,7 +9,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,19 +19,19 @@ public final class AccessToken {
 
   private final String id;
 
-  private final String user;
+  @NotNull private final String user;
 
-  private final String name;
+  @NotNull private final String name;
 
-  private final String token;
+  @Nullable private final String token;
 
-  private final Instant createdAt;
+  @Nullable private final Instant createdAt;
 
-  private final Instant expiresAt;
+  @Nullable private final Instant expiresAt;
 
-  private final Instant lastUsed;
+  @Nullable private final Instant lastUsed;
 
-  private final List<String> scopeList;
+  @NotNull private final List<String> scopeList;
 
   private final boolean impersonation;
 
@@ -52,56 +51,49 @@ public final class AccessToken {
     this.impersonation = builder.impersonation;
     this.active = builder.active;
     this.revoked = builder.revoked;
+
+    Objects.requireNonNull(this.user, "user is null");
+    Objects.requireNonNull(this.name, "name is null");
   }
 
   @JsonProperty
-  public Optional<String> id() {
-    if (this.id == null) {
-      return Optional.empty();
-    }
-    return Optional.of(this.id);
+  public String id() {
+    return this.id;
   }
 
-  @NotNull
   @JsonProperty
   public String user() {
     return this.user;
   }
 
-  @NotNull
   @JsonProperty
   public String name() {
     return this.name;
   }
 
-  @Nullable
   @JsonProperty
   public String token() {
     return this.token;
   }
 
-  @Nullable
   @JsonProperty
   public Instant createdAt() {
     return this.createdAt;
   }
 
-  @Nullable
   @JsonProperty
   public Instant expiresAt() {
     return this.expiresAt;
   }
 
-  @Nullable
   @JsonProperty
   public Instant lastUsed() {
     return this.lastUsed;
   }
 
-  @NotNull
   @JsonProperty
   public List<String> scopeList() {
-    return this.scopeList;
+    return List.copyOf(this.scopeList);
   }
 
   @JsonProperty
@@ -297,8 +289,6 @@ public final class AccessToken {
     }
 
     public AccessToken build() {
-      Objects.requireNonNull(this.user, "user is null");
-      Objects.requireNonNull(this.name, "name is null");
       return new AccessToken(this);
     }
 
