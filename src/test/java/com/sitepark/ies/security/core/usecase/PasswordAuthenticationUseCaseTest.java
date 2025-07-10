@@ -7,11 +7,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.sitepark.ies.security.core.domain.value.AuthenticationRequirement;
+import com.sitepark.ies.security.core.domain.value.AuthenticationResult;
 import com.sitepark.ies.security.core.domain.value.PartialAuthenticationState;
 import com.sitepark.ies.security.core.port.AuthenticationAttemptLimiter;
-import com.sitepark.ies.security.core.port.MfaAuthenticationProcessStore;
+import com.sitepark.ies.security.core.port.TotpAuthenticationProcessStore;
 import com.sitepark.ies.security.core.port.UserService;
-import com.sitepark.ies.security.core.usecase.authentication.AuthenticationResult;
 import com.sitepark.ies.sharedkernel.security.AuthFactor;
 import com.sitepark.ies.sharedkernel.security.AuthMethod;
 import com.sitepark.ies.sharedkernel.security.PasswordEncoder;
@@ -32,7 +32,7 @@ class PasswordAuthenticationUseCaseTest {
   private UserService userService;
   private PasswordEncoder passwordEncoder;
   private AuthenticationAttemptLimiter loginAttemptLimiter;
-  private MfaAuthenticationProcessStore authenticationProcessStore;
+  private TotpAuthenticationProcessStore authenticationProcessStore;
   private PasswordAuthenticationUseCase useCase;
 
   @BeforeEach
@@ -40,7 +40,7 @@ class PasswordAuthenticationUseCaseTest {
     userService = mock(UserService.class);
     passwordEncoder = mock(PasswordEncoder.class);
     loginAttemptLimiter = mock(AuthenticationAttemptLimiter.class);
-    authenticationProcessStore = mock(MfaAuthenticationProcessStore.class);
+    authenticationProcessStore = mock(TotpAuthenticationProcessStore.class);
 
     useCase =
         new PasswordAuthenticationUseCase(

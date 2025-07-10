@@ -1,11 +1,11 @@
 package com.sitepark.ies.security.core.usecase;
 
 import com.sitepark.ies.security.core.domain.value.AuthenticationRequirement;
+import com.sitepark.ies.security.core.domain.value.AuthenticationResult;
 import com.sitepark.ies.security.core.domain.value.PartialAuthenticationState;
 import com.sitepark.ies.security.core.port.AuthenticationAttemptLimiter;
-import com.sitepark.ies.security.core.port.MfaAuthenticationProcessStore;
+import com.sitepark.ies.security.core.port.TotpAuthenticationProcessStore;
 import com.sitepark.ies.security.core.port.UserService;
-import com.sitepark.ies.security.core.usecase.authentication.AuthenticationResult;
 import com.sitepark.ies.sharedkernel.security.AuthFactor;
 import com.sitepark.ies.sharedkernel.security.AuthMethod;
 import com.sitepark.ies.sharedkernel.security.PasswordEncoder;
@@ -31,7 +31,7 @@ public class PasswordAuthenticationUseCase {
 
   private final AuthenticationAttemptLimiter loginAttemptLimiter;
 
-  private final MfaAuthenticationProcessStore authenticationProcessStore;
+  private final TotpAuthenticationProcessStore authenticationProcessStore;
 
   private final Logger LOGGER = LogManager.getLogger();
 
@@ -42,7 +42,7 @@ public class PasswordAuthenticationUseCase {
       UserService userService,
       PasswordEncoder passwordEncoder,
       AuthenticationAttemptLimiter loginAttemptLimiter,
-      MfaAuthenticationProcessStore authenticationSessionStore) {
+      TotpAuthenticationProcessStore authenticationSessionStore) {
     this.clock = clock;
     this.userService = userService;
     this.passwordEncoder = passwordEncoder;
