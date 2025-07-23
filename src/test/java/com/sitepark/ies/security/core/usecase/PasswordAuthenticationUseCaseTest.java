@@ -10,10 +10,12 @@ import com.sitepark.ies.security.core.domain.value.AuthenticationRequirement;
 import com.sitepark.ies.security.core.domain.value.AuthenticationResult;
 import com.sitepark.ies.security.core.domain.value.PartialAuthenticationState;
 import com.sitepark.ies.security.core.port.AuthenticationAttemptLimiter;
+import com.sitepark.ies.security.core.port.LdapAuthenticator;
 import com.sitepark.ies.security.core.port.TotpAuthenticationProcessStore;
 import com.sitepark.ies.security.core.port.UserService;
 import com.sitepark.ies.sharedkernel.security.AuthFactor;
 import com.sitepark.ies.sharedkernel.security.AuthMethod;
+import com.sitepark.ies.sharedkernel.security.Identity;
 import com.sitepark.ies.sharedkernel.security.PasswordEncoder;
 import com.sitepark.ies.sharedkernel.security.User;
 import java.time.Clock;
@@ -30,6 +32,7 @@ class PasswordAuthenticationUseCaseTest {
       Clock.fixed(OffsetDateTime.now().toInstant(), ZoneId.systemDefault());
 
   private UserService userService;
+  private LdapAuthenticator ldapAuthenticator;
   private PasswordEncoder passwordEncoder;
   private AuthenticationAttemptLimiter loginAttemptLimiter;
   private TotpAuthenticationProcessStore authenticationProcessStore;
@@ -37,15 +40,17 @@ class PasswordAuthenticationUseCaseTest {
 
   @BeforeEach
   void setUp() {
-    userService = mock(UserService.class);
-    passwordEncoder = mock(PasswordEncoder.class);
-    loginAttemptLimiter = mock(AuthenticationAttemptLimiter.class);
-    authenticationProcessStore = mock(TotpAuthenticationProcessStore.class);
+    userService = mock();
+    ldapAuthenticator = mock();
+    passwordEncoder = mock();
+    loginAttemptLimiter = mock();
+    authenticationProcessStore = mock();
 
     useCase =
         new PasswordAuthenticationUseCase(
             fixedClock,
             userService,
+            ldapAuthenticator,
             passwordEncoder,
             loginAttemptLimiter,
             authenticationProcessStore);
@@ -77,7 +82,7 @@ class PasswordAuthenticationUseCaseTest {
   @Test
   void testFailureUserHasNoPassword() {
     when(this.loginAttemptLimiter.accept(any())).thenReturn(true);
-    User user = mock();
+    User user = User.builder().id("1").username("peterpan").lastName("Pan").build();
     when(this.userService.findByUsername(any())).thenReturn(Optional.of(user));
     when(this.passwordEncoder.matches(any(), any())).thenReturn(false);
 
@@ -90,7 +95,7 @@ class PasswordAuthenticationUseCaseTest {
   @Test
   void testFailurePasswordNotMatch() {
     when(this.loginAttemptLimiter.accept(any())).thenReturn(true);
-    User user = mock();
+    User user = User.builder().id("1").username("peterpan").lastName("Pan").build();
     when(this.userService.findByUsername(any())).thenReturn(Optional.of(user));
     when(this.userService.getPasswordHash(any())).thenReturn(Optional.of("hashedPassword"));
     when(this.passwordEncoder.matches(any(), any())).thenReturn(false);
@@ -160,5 +165,43 @@ class PasswordAuthenticationUseCaseTest {
         "Expected successful authentication without additional factors");
 
     verify(this.authenticationProcessStore).store(expectedPartialState);
+  }
+
+  @Test
+  void testFailureLdapAuthentication() {
+    when(this.loginAttemptLimiter.accept(any())).thenReturn(true);
+    User user =
+        User.builder()
+            .id("1")
+            .username("username")
+            .lastName("Test")
+            .identity(Identity.ldap(1, "cn=username,ou=users,dc=example,dc=com"))
+            .build();
+    when(this.userService.findByUsername("username")).thenReturn(Optional.of(user));
+    when(this.ldapAuthenticator.authenticate(any(), any())).thenReturn(false);
+
+    assertEquals(
+        AuthenticationResult.failure(),
+        this.useCase.passwordAuthentication("username", "password", "purpose"),
+        "Expected failure due to password not matching");
+  }
+
+  @Test
+  void testSuccessLdapAuthentication() {
+    when(this.loginAttemptLimiter.accept(any())).thenReturn(true);
+    User user =
+        User.builder()
+            .id("1")
+            .username("username")
+            .lastName("Test")
+            .identity(Identity.ldap(1, "cn=username,ou=users,dc=example,dc=com"))
+            .build();
+    when(this.userService.findByUsername("username")).thenReturn(Optional.of(user));
+    when(this.ldapAuthenticator.authenticate(any(), any())).thenReturn(true);
+
+    assertEquals(
+        AuthenticationResult.success(user, "purpose"),
+        this.useCase.passwordAuthentication("username", "password", "purpose"),
+        "Expected successful LDAP authentication");
   }
 }
