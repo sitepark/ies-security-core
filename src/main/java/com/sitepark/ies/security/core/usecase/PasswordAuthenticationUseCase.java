@@ -4,10 +4,13 @@ import com.sitepark.ies.security.core.domain.value.AuthenticationRequirement;
 import com.sitepark.ies.security.core.domain.value.AuthenticationResult;
 import com.sitepark.ies.security.core.domain.value.PartialAuthenticationState;
 import com.sitepark.ies.security.core.port.AuthenticationAttemptLimiter;
+import com.sitepark.ies.security.core.port.LdapAuthenticator;
 import com.sitepark.ies.security.core.port.TotpAuthenticationProcessStore;
 import com.sitepark.ies.security.core.port.UserService;
 import com.sitepark.ies.sharedkernel.security.AuthFactor;
 import com.sitepark.ies.sharedkernel.security.AuthMethod;
+import com.sitepark.ies.sharedkernel.security.InternalIdentity;
+import com.sitepark.ies.sharedkernel.security.LdapIdentity;
 import com.sitepark.ies.sharedkernel.security.PasswordEncoder;
 import com.sitepark.ies.sharedkernel.security.User;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -16,7 +19,6 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,24 +29,28 @@ public class PasswordAuthenticationUseCase {
 
   private final UserService userService;
 
+  private final LdapAuthenticator ldapAuthenticator;
+
   private final PasswordEncoder passwordEncoder;
 
   private final AuthenticationAttemptLimiter loginAttemptLimiter;
 
   private final TotpAuthenticationProcessStore authenticationProcessStore;
 
-  private final Logger LOGGER = LogManager.getLogger();
+  private static final Logger LOGGER = LogManager.getLogger();
 
   @Inject
   @SuppressFBWarnings("EI_EXPOSE_REP2")
   public PasswordAuthenticationUseCase(
       Clock clock,
       UserService userService,
+      LdapAuthenticator ldapAuthenticator,
       PasswordEncoder passwordEncoder,
       AuthenticationAttemptLimiter loginAttemptLimiter,
       TotpAuthenticationProcessStore authenticationSessionStore) {
     this.clock = clock;
     this.userService = userService;
+    this.ldapAuthenticator = ldapAuthenticator;
     this.passwordEncoder = passwordEncoder;
     this.loginAttemptLimiter = loginAttemptLimiter;
     this.authenticationProcessStore = authenticationSessionStore;
@@ -57,29 +63,17 @@ public class PasswordAuthenticationUseCase {
       return AuthenticationResult.failure();
     }
 
-    Optional<User> optUser = validateUserAndUpgradePassword(username, password);
+    Optional<User> optUser = loadUser(username);
     if (optUser.isEmpty()) {
       return AuthenticationResult.failure();
     }
-    User user = optUser.get();
 
-    if (user.authFactors().isEmpty()) {
-      return AuthenticationResult.success(user, purpose);
+    User user = optUser.get();
+    if (!authenticateUser(user, password)) {
+      return AuthenticationResult.failure();
     }
 
-    List<AuthenticationRequirement> requirements = getLoginRequirements(user);
-
-    String authProcessId =
-        this.authenticationProcessStore.store(
-            new PartialAuthenticationState(
-                user,
-                AuthMethod.PASSWORD,
-                requirements.toArray(AuthenticationRequirement[]::new),
-                Instant.now(this.clock),
-                purpose));
-
-    return AuthenticationResult.partial(
-        authProcessId, requirements.toArray(AuthenticationRequirement[]::new));
+    return buildAuthenticationResult(user, purpose);
   }
 
   private boolean isLoginAllowed(String username, String purpose) {
@@ -104,21 +98,57 @@ public class PasswordAuthenticationUseCase {
     return true;
   }
 
-  private Optional<User> validateUserAndUpgradePassword(String username, String password) {
+  private Optional<User> loadUser(String username) {
     Optional<User> optUser = this.userService.findByUsername(username);
     if (optUser.isEmpty()) {
       this.loginAttemptLimiter.onFailedLogin(username);
       return Optional.empty();
     }
-    User user = optUser.get();
+    return optUser;
+  }
+
+  private boolean authenticateUser(User user, String password) {
+    return switch (user.identity()) {
+      case InternalIdentity ignored -> authenticateInternalUserAndUpgradePassword(user, password);
+      case LdapIdentity ldap -> authenticateLdapIdentity(user.username(), ldap, password);
+      default -> {
+        if (LOGGER.isWarnEnabled()) {
+          LOGGER.warn(
+              "Unsupported identity type '{}' for user '{}'",
+              user.identity().getClass().getName(),
+              user.username());
+        }
+        yield false;
+      }
+    };
+  }
+
+  private AuthenticationResult buildAuthenticationResult(User user, String purpose) {
+
+    if (user.authFactors().isEmpty()) {
+      return AuthenticationResult.success(user, purpose);
+    }
+
+    AuthenticationRequirement[] requirements = getLoginRequirements(user);
+
+    String authProcessId =
+        this.authenticationProcessStore.store(
+            new PartialAuthenticationState(
+                user, AuthMethod.PASSWORD, requirements, Instant.now(this.clock), purpose));
+
+    return AuthenticationResult.partial(authProcessId, requirements);
+  }
+
+  private boolean authenticateInternalUserAndUpgradePassword(User user, String password) {
+
     Optional<String> passwordHash = this.userService.getPasswordHash(user.id());
     if (passwordHash.isEmpty()) {
-      this.loginAttemptLimiter.onFailedLogin(username);
-      return Optional.empty();
+      this.loginAttemptLimiter.onFailedLogin(user.username());
+      return false;
     }
     if (!passwordEncoder.matches(password, passwordHash.get())) {
-      this.loginAttemptLimiter.onFailedLogin(username);
-      return Optional.empty();
+      this.loginAttemptLimiter.onFailedLogin(user.username());
+      return false;
     }
 
     if (passwordEncoder.upgradeEncoding(passwordHash.get())) {
@@ -126,19 +156,34 @@ public class PasswordAuthenticationUseCase {
       this.userService.upgradePasswordHash(user.username(), upgradedHash);
     }
 
-    this.loginAttemptLimiter.onSuccessfulLogin(username);
-    return Optional.of(user);
+    this.loginAttemptLimiter.onSuccessfulLogin(user.username());
+
+    return true;
   }
 
-  private List<AuthenticationRequirement> getLoginRequirements(User user) {
+  private boolean authenticateLdapIdentity(
+      String username, LdapIdentity identity, String password) {
+
+    if (!this.ldapAuthenticator.authenticate(identity, password)) {
+      this.loginAttemptLimiter.onFailedLogin(username);
+      return false;
+    }
+
+    this.loginAttemptLimiter.onSuccessfulLogin(username);
+    return true;
+  }
+
+  private AuthenticationRequirement[] getLoginRequirements(User user) {
     List<AuthenticationRequirement> requirements = new ArrayList<>();
     for (AuthFactor authFactor : user.authFactors()) {
-      if (Objects.requireNonNull(authFactor) == AuthFactor.TOTP) {
+      if (authFactor == AuthFactor.TOTP) {
         requirements.add(AuthenticationRequirement.TOTP_CODE_REQUIRED);
       } else {
-        throw new IllegalArgumentException("Unsupported auth factor: " + authFactor);
+        throw new IllegalStateException(
+            "Unsupported auth factor: " + authFactor + " for user: " + user.username());
       }
     }
-    return requirements;
+
+    return requirements.toArray(AuthenticationRequirement[]::new);
   }
 }

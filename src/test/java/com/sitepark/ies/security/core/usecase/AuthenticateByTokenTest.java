@@ -14,6 +14,7 @@ import com.sitepark.ies.security.core.domain.exception.AccessTokenRevokedExcepti
 import com.sitepark.ies.security.core.domain.exception.InvalidAccessTokenException;
 import com.sitepark.ies.security.core.port.AccessTokenRepository;
 import com.sitepark.ies.security.core.port.UserService;
+import com.sitepark.ies.sharedkernel.security.Identity;
 import com.sitepark.ies.sharedkernel.security.User;
 import java.time.Clock;
 import java.time.Instant;
@@ -152,6 +153,7 @@ class AuthenticateByTokenTest {
         User.builder()
             .id("1")
             .username("test")
+            .identity(Identity.internal())
             .firstName("First")
             .lastName("Last")
             .email("test@test.com")
@@ -183,6 +185,7 @@ class AuthenticateByTokenTest {
         User.builder()
             .id("1")
             .username("test")
+            .identity(Identity.internal())
             .firstName("First")
             .lastName("Last")
             .email("test@test.com")
