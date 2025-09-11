@@ -175,7 +175,7 @@ class PasswordAuthenticationUseCaseTest {
             .id("1")
             .username("username")
             .lastName("Test")
-            .identity(Identity.ldap(1, "cn=username,ou=users,dc=example,dc=com"))
+            .identity(Identity.ldap("1", "cn=username,ou=users,dc=example,dc=com"))
             .build();
     when(this.userService.findByUsername("username")).thenReturn(Optional.of(user));
     when(this.ldapAuthenticator.authenticate(any(), any())).thenReturn(false);
@@ -194,7 +194,7 @@ class PasswordAuthenticationUseCaseTest {
             .id("1")
             .username("username")
             .lastName("Test")
-            .identity(Identity.ldap(1, "cn=username,ou=users,dc=example,dc=com"))
+            .identity(Identity.ldap("1", "cn=username,ou=users,dc=example,dc=com"))
             .build();
     when(this.userService.findByUsername("username")).thenReturn(Optional.of(user));
     when(this.ldapAuthenticator.authenticate(any(), any())).thenReturn(true);
