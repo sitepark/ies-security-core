@@ -1,7 +1,7 @@
 package com.sitepark.ies.security.core.port;
 
 import com.sitepark.ies.security.core.domain.entity.Session;
-import com.sitepark.ies.security.core.domain.entity.UserBasedAuthentication;
+import com.sitepark.ies.sharedkernel.security.UserBasedAuthentication;
 
 public interface SessionRegistry {
 

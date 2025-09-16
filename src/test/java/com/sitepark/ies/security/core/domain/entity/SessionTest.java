@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
 import com.jparams.verifier.tostring.ToStringVerifier;
+import com.sitepark.ies.sharedkernel.security.UserBasedAuthentication;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;

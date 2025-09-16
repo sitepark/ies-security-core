@@ -1,5 +1,6 @@
 package com.sitepark.ies.security.core.domain.entity;
 
+import com.sitepark.ies.sharedkernel.security.UserBasedAuthentication;
 import java.time.Instant;
 import java.util.Objects;
 
