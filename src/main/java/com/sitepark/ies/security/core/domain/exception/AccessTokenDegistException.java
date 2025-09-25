@@ -1,10 +1,12 @@
 package com.sitepark.ies.security.core.domain.exception;
 
+import com.sitepark.ies.sharedkernel.domain.DomainException;
+
 /**
  * The <code>AccessTokenDegistException</code> exception is thrown if the access token could't be
  * digest.
  */
-public class AccessTokenDegistException extends RuntimeException {
+public class AccessTokenDegistException extends DomainException {
 
   private static final long serialVersionUID = 1L;
 
