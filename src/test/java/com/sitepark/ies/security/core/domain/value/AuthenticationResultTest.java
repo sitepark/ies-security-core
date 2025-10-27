@@ -65,7 +65,7 @@ class AuthenticationResultTest {
     String json = mapper.writeValueAsString(result);
     String expected =
         """
-        {"status":"SUCCESS","user":{"id":"1","username":"test","lastName":"test","identity":{"@type":"internal"}},"purpose":"purpose"}\
+        {"status":"SUCCESS","user":{"id":"1","username":"test","lastName":"test","identity":{"type":"internal"}},"purpose":"purpose"}\
         """;
 
     assertEquals(expected, json, "JSON serialization should match expected format");
