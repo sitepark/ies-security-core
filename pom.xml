@@ -48,7 +48,7 @@
 
 	<properties>
 		<junit.version>5.13.4</junit.version>
-		<spotbugs.version>4.9.6</spotbugs.version>
+		<spotbugs.version>4.9.8</spotbugs.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.release>21</maven.compiler.release>
 		<gpg.skip>true</gpg.skip>
@@ -162,7 +162,7 @@
 		<dependency>
 			<groupId>nl.jqno.equalsverifier</groupId>
 			<artifactId>equalsverifier</artifactId>
-			<version>4.1.1</version>
+			<version>4.2</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -233,7 +233,7 @@
 					<dependency>
 						<groupId>me.fabriciorby</groupId>
 						<artifactId>maven-surefire-junit5-tree-reporter</artifactId>
-						<version>1.4.0</version>
+						<version>1.5.1</version>
 					</dependency>
 				</dependencies>
 			</plugin>
@@ -253,7 +253,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.11.3</version>
+				<version>3.12.0</version>
 				<configuration>
 					<doclint>all,-missing</doclint>
 				</configuration>
@@ -291,7 +291,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
-				<version>3.6.1</version>
+				<version>3.6.2</version>
 				<dependencies>
 					<dependency>
 						<groupId>io.github.thefolle</groupId>
@@ -339,7 +339,7 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.8.13</version>
+				<version>0.8.14</version>
 				<executions>
 					<execution>
 						<goals>
@@ -419,7 +419,7 @@
 			<plugin>
 				<groupId>com.github.spotbugs</groupId>
 				<artifactId>spotbugs-maven-plugin</artifactId>
-				<version>4.9.6.0</version>
+				<version>4.9.8.1</version>
 				<configuration>
 					<effort>Max</effort>
 					<threshold>Low</threshold>
@@ -433,7 +433,7 @@
 					<dependency>
 						<groupId>com.github.spotbugs</groupId>
 						<artifactId>spotbugs</artifactId>
-						<version>4.9.6</version>
+						<version>4.9.8</version>
 					</dependency>
 				</dependencies>
 				<executions>
@@ -448,7 +448,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-pmd-plugin</artifactId>
-				<version>3.27.0</version>
+				<version>3.28.0</version>
 				<configuration>
 					<rulesets>
 						<ruleset>pmd-ruleset.xml</ruleset>
@@ -479,7 +479,7 @@
 					<plugin>
 						<groupId>org.sonatype.central</groupId>
 						<artifactId>central-publishing-maven-plugin</artifactId>
-						<version>0.8.0</version>
+						<version>0.9.0</version>
 						<extensions>true</extensions>
 						<configuration>
 							<publishingServerId>central</publishingServerId>
