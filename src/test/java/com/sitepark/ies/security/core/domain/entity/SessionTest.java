@@ -28,7 +28,7 @@ class SessionTest {
 
   @Test
   void testId() {
-    Session session = Session.builder().id("1").build();
+    Session session = Session.builder().id("1").purpose("test").build();
     assertEquals("1", session.id(), "Session id should be '1'");
   }
 
@@ -51,7 +51,7 @@ class SessionTest {
   @Test
   void testCreatedAt() {
     Instant now = Instant.now(this.fixedClock);
-    Session session = Session.builder().createdAt(now).build();
+    Session session = Session.builder().createdAt(now).purpose("test").build();
     assertEquals(now, session.createdAt(), "Session createdAt should match the provided Instant");
   }
 
@@ -66,7 +66,7 @@ class SessionTest {
   @Test
   void testAuthentication() {
     UserAuthentication authentication = mock();
-    Session session = Session.builder().authentication(authentication).build();
+    Session session = Session.builder().authentication(authentication).purpose("test").build();
     assertEquals(
         authentication,
         session.authentication(),
@@ -89,6 +89,7 @@ class SessionTest {
             .id("1")
             .createdAt(Instant.now(this.fixedClock))
             .authentication(authentication)
+            .purpose("test")
             .build()
             .toBuilder()
             .id("2")
@@ -99,6 +100,7 @@ class SessionTest {
             .id("2")
             .createdAt(Instant.now(this.fixedClock))
             .authentication(authentication)
+            .purpose("test")
             .build();
 
     assertEquals(expected, session, "Session should be equal after toBuilder and id change");
