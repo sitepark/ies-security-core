@@ -26,12 +26,10 @@ public final class SetUserPasswordRequest {
     return new Builder();
   }
 
-  @NotNull
   public String userId() {
     return this.userId;
   }
 
-  @NotNull
   public String newPassword() {
     return this.newPassword;
   }

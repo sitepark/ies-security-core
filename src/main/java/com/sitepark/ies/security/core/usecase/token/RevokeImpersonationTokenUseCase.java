@@ -22,16 +22,16 @@ public class RevokeImpersonationTokenUseCase {
     this.accessControl = accessControl;
   }
 
-  public void revokeImpersonationToken(String user, String id) {
+  public void revokeImpersonationToken(String id) {
 
     if (!this.accessControl.isImpersonationTokensManageable()) {
       throw new AccessDeniedException("Not allowed manage impersonation tokens");
     }
 
     if (LOGGER.isInfoEnabled()) {
-      LOGGER.info("revoke impersonation token: {}/{}", user, id);
+      LOGGER.info("revoke impersonation token: {}", id);
     }
 
-    this.repository.revoke(user, id);
+    this.repository.revoke(id);
   }
 }

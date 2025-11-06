@@ -6,11 +6,16 @@ import com.sitepark.ies.security.core.domain.exception.AccessTokenNotActiveExcep
 import com.sitepark.ies.security.core.domain.exception.AccessTokenRevokedException;
 import com.sitepark.ies.security.core.domain.exception.InvalidAccessTokenException;
 import com.sitepark.ies.security.core.port.AccessTokenRepository;
+import com.sitepark.ies.security.core.port.PermissionLoader;
 import com.sitepark.ies.security.core.port.UserService;
+import com.sitepark.ies.sharedkernel.security.Authentication;
+import com.sitepark.ies.sharedkernel.security.Permission;
 import com.sitepark.ies.sharedkernel.security.User;
+import com.sitepark.ies.sharedkernel.security.UserBasedAuthentication;
 import jakarta.inject.Inject;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 public class TokenAuthenticationUseCase {
@@ -19,17 +24,23 @@ public class TokenAuthenticationUseCase {
 
   private final AccessTokenRepository accessTokenRepository;
 
+  private final PermissionLoader permissionLoader;
+
   private final UserService userService;
 
   @Inject
   protected TokenAuthenticationUseCase(
-      Clock clock, AccessTokenRepository accessTokenRepository, UserService userService) {
+      Clock clock,
+      AccessTokenRepository accessTokenRepository,
+      PermissionLoader permissionLoader,
+      UserService userService) {
     this.clock = clock;
     this.accessTokenRepository = accessTokenRepository;
+    this.permissionLoader = permissionLoader;
     this.userService = userService;
   }
 
-  public User authenticateByToken(String token) {
+  public Authentication authenticateByToken(String token) {
 
     Optional<AccessToken> accessTokenOpt = this.accessTokenRepository.getByToken(token);
     if (accessTokenOpt.isEmpty()) {
@@ -50,7 +61,13 @@ public class TokenAuthenticationUseCase {
       throw new InvalidAccessTokenException("User " + accessToken.userId() + " not found");
     }
 
-    return user.get();
+    List<Permission> permissions = this.permissionLoader.loadByUser(user.get().id());
+
+    return UserBasedAuthentication.builder()
+        .user(user.get())
+        .permissions(permissions)
+        .purpose(accessToken.name())
+        .build();
   }
 
   public void checkExpirationDate(Instant expiredAt) {

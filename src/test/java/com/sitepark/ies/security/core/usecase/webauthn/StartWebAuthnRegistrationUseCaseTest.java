@@ -36,8 +36,8 @@ class StartWebAuthnRegistrationUseCaseTest {
   @Test
   void testWithInvalidOrigin() {
     String invalidOrigin = ":htp//invalid-origin";
-    WebAuthnRegistrationCommand command =
-        new WebAuthnRegistrationCommand("user123", invalidOrigin, "Test App", "Test Key");
+    WebAuthnRegistrationRequest command =
+        new WebAuthnRegistrationRequest("user123", invalidOrigin, "Test App", "Test Key");
 
     assertThrows(IllegalArgumentException.class, () -> useCase.startWebAuthnRegistration(command));
   }
@@ -47,8 +47,8 @@ class StartWebAuthnRegistrationUseCaseTest {
 
     when(accessControl.isWebAuthnRegistrationAllowed(any())).thenReturn(false);
 
-    WebAuthnRegistrationCommand command =
-        new WebAuthnRegistrationCommand(
+    WebAuthnRegistrationRequest command =
+        new WebAuthnRegistrationRequest(
             "user123", "https://valid-origin.com", "Test App", "Test Key");
 
     assertThrows(AccessDeniedException.class, () -> useCase.startWebAuthnRegistration(command));
@@ -59,8 +59,8 @@ class StartWebAuthnRegistrationUseCaseTest {
 
     when(accessControl.isWebAuthnRegistrationAllowed(any())).thenReturn(true);
 
-    WebAuthnRegistrationCommand command =
-        new WebAuthnRegistrationCommand(
+    WebAuthnRegistrationRequest command =
+        new WebAuthnRegistrationRequest(
             "nonexistentUser", "https://valid-origin.com", "Test App", "Test Key");
 
     when(userService.findById(any())).thenReturn(Optional.empty());
@@ -75,8 +75,8 @@ class StartWebAuthnRegistrationUseCaseTest {
     User user = User.builder().id("123").username("peterpan").lastName("Pan").build();
     when(userService.findById(any())).thenReturn(Optional.of(user));
 
-    WebAuthnRegistrationCommand command =
-        new WebAuthnRegistrationCommand("123", "https://valid-origin.com", "Test App", "Test Key");
+    WebAuthnRegistrationRequest command =
+        new WebAuthnRegistrationRequest("123", "https://valid-origin.com", "Test App", "Test Key");
 
     this.useCase.startWebAuthnRegistration(command);
 

@@ -8,12 +8,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.sitepark.ies.security.core.domain.value.TokenType;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Arrays;
-import java.util.List;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 
@@ -36,8 +35,13 @@ class AccessTokenTest {
 
   @Test
   void testSetUser() throws JsonProcessingException {
-    AccessToken accessToken = AccessToken.builder().user("345").name(TOKEN_NAME).build();
-    assertEquals("345", accessToken.user(), "wrong user");
+    AccessToken accessToken =
+        AccessToken.builder()
+            .userId("345")
+            .name(TOKEN_NAME)
+            .tokenType(TokenType.IMPERSONATION)
+            .build();
+    assertEquals("345", accessToken.userId(), "wrong user");
   }
 
   @Test
@@ -45,31 +49,18 @@ class AccessTokenTest {
     assertThrows(
         NullPointerException.class,
         () -> {
-          AccessToken.builder().user(null);
-        });
-  }
-
-  @Test
-  void testSetUserWithZero() throws JsonProcessingException {
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> {
-          AccessToken.builder().user("0");
-        });
-  }
-
-  @Test
-  void testSetUserWithInvalidValue() throws JsonProcessingException {
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> {
-          AccessToken.builder().user("1x");
+          AccessToken.builder().userId(null);
         });
   }
 
   @Test
   void testSetName() throws JsonProcessingException {
-    AccessToken accessToken = AccessToken.builder().user("345").name(TOKEN_NAME).build();
+    AccessToken accessToken =
+        AccessToken.builder()
+            .userId("345")
+            .name(TOKEN_NAME)
+            .tokenType(TokenType.IMPERSONATION)
+            .build();
     assertEquals(TOKEN_NAME, accessToken.name(), "wrong name");
   }
 
@@ -105,7 +96,7 @@ class AccessTokenTest {
     assertThrows(
         NullPointerException.class,
         () -> {
-          AccessToken.builder().user("123").build();
+          AccessToken.builder().userId("123").build();
         });
   }
 
@@ -131,48 +122,6 @@ class AccessTokenTest {
   }
 
   @Test
-  void testSetIdWithZero() throws JsonProcessingException {
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> {
-          AccessToken.builder().id("0");
-        });
-  }
-
-  @Test
-  void testSetIdWithInvalidValue() throws JsonProcessingException {
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> {
-          AccessToken.builder().id("1x");
-        });
-  }
-
-  @Test
-  void testSetToken() throws JsonProcessingException {
-    AccessToken accessToken = this.createBuilderWithRequiredValues().token("abc").build();
-    assertEquals("abc", accessToken.token(), "wrong token");
-  }
-
-  @Test
-  void testSetNullToken() throws JsonProcessingException {
-    assertThrows(
-        NullPointerException.class,
-        () -> {
-          AccessToken.builder().token(null);
-        });
-  }
-
-  @Test
-  void testSetBlankToken() throws JsonProcessingException {
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> {
-          AccessToken.builder().token(" ");
-        });
-  }
-
-  @Test
   void testSetCreatedAt() throws JsonProcessingException {
 
     Instant createdAt = LocalDate.of(2023, 8, 21).atStartOfDay().atZone(ZONE_ID).toInstant();
@@ -180,15 +129,6 @@ class AccessTokenTest {
     AccessToken accessToken = this.createBuilderWithRequiredValues().createdAt(createdAt).build();
 
     assertEquals(createdAt, accessToken.createdAt(), "unexpected createAt");
-  }
-
-  @Test
-  void testSetNullCreatedAt() throws JsonProcessingException {
-    assertThrows(
-        NullPointerException.class,
-        () -> {
-          AccessToken.builder().createdAt(null);
-        });
   }
 
   @Test
@@ -202,15 +142,6 @@ class AccessTokenTest {
   }
 
   @Test
-  void testSetNullExpiresAt() throws JsonProcessingException {
-    assertThrows(
-        NullPointerException.class,
-        () -> {
-          AccessToken.builder().expiresAt(null);
-        });
-  }
-
-  @Test
   void testSetLastUsed() throws JsonProcessingException {
 
     Instant lastUsed = LocalDate.of(2023, 8, 21).atStartOfDay().atZone(ZONE_ID).toInstant();
@@ -218,142 +149,6 @@ class AccessTokenTest {
     AccessToken accessToken = this.createBuilderWithRequiredValues().lastUsed(lastUsed).build();
 
     assertEquals(lastUsed, accessToken.lastUsed(), "unexpected lastUsed");
-  }
-
-  @Test
-  void testSetNullLastUsed() throws JsonProcessingException {
-    assertThrows(
-        NullPointerException.class,
-        () -> {
-          AccessToken.builder().lastUsed(null);
-        });
-  }
-
-  @Test
-  @SuppressWarnings("PMD.AvoidDuplicateLiterals")
-  void testSetScopeListViaList() throws JsonProcessingException {
-    AccessToken accessToken =
-        this.createBuilderWithRequiredValues().scopeList(Arrays.asList("a", "b")).build();
-
-    assertEquals(Arrays.asList("a", "b"), accessToken.scopeList(), "unexpected scopeList");
-  }
-
-  @Test
-  void testSetNullScopeListViaList() throws JsonProcessingException {
-    assertThrows(
-        NullPointerException.class,
-        () -> {
-          AccessToken.builder().scopeList((List<String>) null);
-        });
-  }
-
-  @Test
-  void testSetNullScopeViaList() throws JsonProcessingException {
-    assertThrows(
-        NullPointerException.class,
-        () -> {
-          AccessToken.builder().scopeList(Arrays.asList("a", null));
-        });
-  }
-
-  @Test
-  void testSetBlankScopeListViaList() throws JsonProcessingException {
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> {
-          AccessToken.builder().scopeList(Arrays.asList("a", " "));
-        });
-  }
-
-  @Test
-  void testOverwriteScopeListViaList() throws JsonProcessingException {
-    AccessToken accessToken =
-        this.createBuilderWithRequiredValues().scopeList(Arrays.asList("a", "b")).build();
-
-    AccessToken overwritten = accessToken.toBuilder().scopeList(Arrays.asList("c", "d")).build();
-
-    assertEquals(Arrays.asList("c", "d"), overwritten.scopeList(), "unexpected scopeList");
-  }
-
-  @Test
-  void testSetScopeListViaVArgs() throws JsonProcessingException {
-    AccessToken accessToken = this.createBuilderWithRequiredValues().scopeList("a", "b").build();
-
-    assertEquals(Arrays.asList("a", "b"), accessToken.scopeList(), "unexpected scopeList");
-  }
-
-  @Test
-  void testOverwriteScopeListViaVArgs() throws JsonProcessingException {
-    AccessToken accessToken = this.createBuilderWithRequiredValues().scopeList("a", "b").build();
-    AccessToken overwritten = accessToken.toBuilder().scopeList("c", "d").build();
-
-    assertEquals(Arrays.asList("c", "d"), overwritten.scopeList(), "unexpected scopeList");
-  }
-
-  @Test
-  void testSetNullScopeListViaVArgs() throws JsonProcessingException {
-    assertThrows(
-        NullPointerException.class,
-        () -> {
-          AccessToken.builder().scopeList((String[]) null);
-        });
-  }
-
-  @Test
-  void testSetNullScopeViaVArgs() throws JsonProcessingException {
-    assertThrows(
-        NullPointerException.class,
-        () -> {
-          AccessToken.builder().scopeList("a", null);
-        });
-  }
-
-  @Test
-  void testSetBlankScopeViaVArgs() throws JsonProcessingException {
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> {
-          AccessToken.builder().scopeList("a", " ");
-        });
-  }
-
-  @Test
-  void testAddScope() throws JsonProcessingException {
-    AccessToken accessToken = this.createBuilderWithRequiredValues().scopeList("a", "b").build();
-
-    AccessToken addition = accessToken.toBuilder().scope("c").build();
-
-    assertEquals(Arrays.asList("a", "b", "c"), addition.scopeList(), "unexpected scopes");
-  }
-
-  @Test
-  void testAddNullScope() throws JsonProcessingException {
-    assertThrows(
-        NullPointerException.class,
-        () -> {
-          this.createBuilderWithRequiredValues().scope(null);
-        });
-  }
-
-  @Test
-  void testAddBlankScope() throws JsonProcessingException {
-    assertThrows(
-        IllegalArgumentException.class,
-        () -> {
-          AccessToken.builder().scope(" ");
-        });
-  }
-
-  @Test
-  void testSetImpersonationTrue() throws JsonProcessingException {
-    AccessToken accessToken = this.createBuilderWithRequiredValues().impersonation(true).build();
-    assertTrue(accessToken.impersonation(), "unexpected impersonation");
-  }
-
-  @Test
-  void testSetImpersonationFalse() throws JsonProcessingException {
-    AccessToken accessToken = this.createBuilderWithRequiredValues().impersonation(false).build();
-    assertFalse(accessToken.impersonation(), "unexpected impersonation");
   }
 
   @Test
@@ -395,12 +190,12 @@ class AccessTokenTest {
     AccessToken accessToken =
         AccessToken.builder()
             .id("123")
-            .user("345")
+            .userId("345")
             .name(TOKEN_NAME)
             .createdAt(createdAt)
             .expiresAt(expiredAt)
             .lastUsed(lastUpdate)
-            .impersonation(true)
+            .tokenType(TokenType.IMPERSONATION)
             .build();
 
     String json = mapper.writeValueAsString(accessToken);
@@ -409,12 +204,12 @@ class AccessTokenTest {
         """
         {\
         "id":"123",\
-        "user":"345",\
+        "userId":"345",\
         "name":"Test Token",\
         "createdAt":"2023-08-20T22:00:00Z",\
         "expiresAt":"2023-12-11T23:00:00Z",\
         "lastUsed":"2023-08-24T22:00:00Z",\
-        "impersonation":true,\
+        "tokenType":"IMPERSONATION",\
         "active":true,\
         "revoked":false\
         }\
@@ -435,12 +230,12 @@ class AccessTokenTest {
         """
         {\
         "id":123,\
-        "user":345,\
+        "userId":345,\
         "name":"Test Token",\
         "createdAt":"2023-08-21T00:00:00+02:00",\
         "expiresAt":"2023-12-12T00:00:00+01:00",\
         "lastUsed":"2023-08-25T00:00:00+02:00",\
-        "impersonation":true,\
+        "tokenType":"IMPERSONATION",\
         "active":true,\
         "revoked":false\
         }\
@@ -455,18 +250,18 @@ class AccessTokenTest {
     AccessToken expected =
         AccessToken.builder()
             .id("123")
-            .user("345")
+            .userId("345")
             .name(TOKEN_NAME)
             .createdAt(createdAt)
             .expiresAt(expiredAt)
             .lastUsed(lastUpdate)
-            .impersonation(true)
+            .tokenType(TokenType.IMPERSONATION)
             .build();
 
     assertEquals(expected, accessToken, "unexpected accessToken");
   }
 
   private AccessToken.Builder createBuilderWithRequiredValues() {
-    return AccessToken.builder().user("345").name(TOKEN_NAME);
+    return AccessToken.builder().userId("345").name(TOKEN_NAME).tokenType(TokenType.IMPERSONATION);
   }
 }

@@ -25,15 +25,15 @@ class StartWebAuthnAssertionUseCaseTest {
   @Test
   void testInvalidOrigin() {
     String invalidOrigin = ":htp//invalid-origin";
-    WebAuthnAssertionCommand command = new WebAuthnAssertionCommand(invalidOrigin, "Test App");
+    WebAuthnAssertionRequest command = new WebAuthnAssertionRequest(invalidOrigin, "Test App");
 
     assertThrows(IllegalArgumentException.class, () -> useCase.startWebAuthnAssertion(command));
   }
 
   @Test
   void testStartWebAuthnAssertion() throws URISyntaxException {
-    WebAuthnAssertionCommand command =
-        new WebAuthnAssertionCommand("https://valid-origin.com", "Test App");
+    WebAuthnAssertionRequest command =
+        new WebAuthnAssertionRequest("https://valid-origin.com", "Test App");
     this.useCase.startWebAuthnAssertion(command);
     verify(this.webAuthnProvider).startAssertion(new URI("https://valid-origin.com"), "Test App");
   }

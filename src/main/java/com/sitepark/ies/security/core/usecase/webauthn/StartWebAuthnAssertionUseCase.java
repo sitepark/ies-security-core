@@ -14,15 +14,15 @@ public class StartWebAuthnAssertionUseCase {
     this.webAuthnProvider = webAuthnProvider;
   }
 
-  public String startWebAuthnAssertion(WebAuthnAssertionCommand command) {
+  public String startWebAuthnAssertion(WebAuthnAssertionRequest request) {
 
     URI origin;
     try {
-      origin = new URI(command.origin());
+      origin = new URI(request.origin());
     } catch (URISyntaxException e) {
-      throw new IllegalArgumentException("Invalid origin: " + command.origin(), e);
+      throw new IllegalArgumentException("Invalid origin: " + request.origin(), e);
     }
 
-    return this.webAuthnProvider.startAssertion(origin, command.applicationName());
+    return this.webAuthnProvider.startAssertion(origin, request.applicationName());
   }
 }

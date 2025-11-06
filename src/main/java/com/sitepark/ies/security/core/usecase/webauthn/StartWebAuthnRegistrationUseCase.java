@@ -24,26 +24,26 @@ public class StartWebAuthnRegistrationUseCase {
     this.webAuthnProvider = webAuthnProvider;
   }
 
-  public String startWebAuthnRegistration(WebAuthnRegistrationCommand command) {
+  public String startWebAuthnRegistration(WebAuthnRegistrationRequest request) {
 
     URI origin;
     try {
-      origin = new URI(command.origin());
+      origin = new URI(request.origin());
     } catch (URISyntaxException e) {
-      throw new IllegalArgumentException("Invalid origin: " + command.origin(), e);
+      throw new IllegalArgumentException("Invalid origin: " + request.origin(), e);
     }
 
-    if (!this.accessControl.isWebAuthnRegistrationAllowed(command.userId())) {
+    if (!this.accessControl.isWebAuthnRegistrationAllowed(request.userId())) {
       throw new AccessDeniedException(
-          "WebAuthn registration not allowed for user: " + command.userId());
+          "WebAuthn registration not allowed for user: " + request.userId());
     }
 
-    Optional<User> user = this.userService.findById(command.userId());
+    Optional<User> user = this.userService.findById(request.userId());
     if (user.isEmpty()) {
-      throw new IllegalArgumentException("User not found: " + command.userId());
+      throw new IllegalArgumentException("User not found: " + request.userId());
     }
 
     return this.webAuthnProvider.startRegistration(
-        user.get(), origin, command.applicationName(), command.keyName());
+        user.get(), origin, request.applicationName(), request.keyName());
   }
 }

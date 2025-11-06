@@ -4,26 +4,27 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
-import com.sitepark.ies.sharedkernel.base.Identifier;
+import com.sitepark.ies.security.core.domain.value.TokenType;
+import com.sitepark.ies.sharedkernel.base.ListBuilder;
+import com.sitepark.ies.sharedkernel.security.Permission;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /** An access token enables authentication as a user without specifying a username and password. */
 @JsonDeserialize(builder = AccessToken.Builder.class)
-@SuppressWarnings({"PMD.DataClass", "PMD.AvoidFieldNameMatchingMethodName", "PMD.TooManyMethods"})
+@SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName", "PMD.TooManyMethods"})
 public final class AccessToken {
 
   private final String id;
 
-  @NotNull private final String user;
+  @NotNull private final String userId;
 
   @NotNull private final String name;
-
-  @Nullable private final String token;
 
   @Nullable private final Instant createdAt;
 
@@ -31,9 +32,9 @@ public final class AccessToken {
 
   @Nullable private final Instant lastUsed;
 
-  @NotNull private final List<String> scopeList;
+  @NotNull private final List<Permission> permissions;
 
-  private final boolean impersonation;
+  private final TokenType tokenType;
 
   private final boolean active;
 
@@ -41,19 +42,18 @@ public final class AccessToken {
 
   private AccessToken(Builder builder) {
     this.id = builder.id;
-    this.user = builder.user;
+    this.userId = builder.userId;
     this.name = builder.name;
-    this.token = builder.token;
     this.createdAt = builder.createdAt;
     this.expiresAt = builder.expiresAt;
     this.lastUsed = builder.lastUsed;
-    this.scopeList = List.copyOf(builder.scopeList);
-    this.impersonation = builder.impersonation;
+    this.permissions = List.copyOf(builder.permissions);
+    this.tokenType = builder.tokenType;
     this.active = builder.active;
     this.revoked = builder.revoked;
 
-    Objects.requireNonNull(this.user, "user is null");
     Objects.requireNonNull(this.name, "name is null");
+    Objects.requireNonNull(this.tokenType, "tokenType is null");
   }
 
   @JsonProperty
@@ -62,18 +62,13 @@ public final class AccessToken {
   }
 
   @JsonProperty
-  public String user() {
-    return this.user;
+  public String userId() {
+    return this.userId;
   }
 
   @JsonProperty
   public String name() {
     return this.name;
-  }
-
-  @JsonProperty
-  public String token() {
-    return this.token;
   }
 
   @JsonProperty
@@ -92,13 +87,13 @@ public final class AccessToken {
   }
 
   @JsonProperty
-  public List<String> scopeList() {
-    return List.copyOf(this.scopeList);
+  public List<Permission> permissions() {
+    return List.copyOf(this.permissions);
   }
 
   @JsonProperty
-  public boolean impersonation() {
-    return this.impersonation;
+  public TokenType tokenType() {
+    return this.tokenType;
   }
 
   @JsonProperty
@@ -123,14 +118,13 @@ public final class AccessToken {
   public int hashCode() {
     return Objects.hash(
         this.id,
-        this.user,
+        this.userId,
         this.name,
-        this.token,
         this.createdAt,
         this.expiresAt,
         this.lastUsed,
-        this.scopeList,
-        this.impersonation,
+        this.permissions,
+        this.tokenType,
         this.active,
         this.revoked);
   }
@@ -143,16 +137,44 @@ public final class AccessToken {
     }
 
     return Objects.equals(this.id, that.id)
-        && Objects.equals(this.user, that.user)
+        && Objects.equals(this.userId, that.userId)
         && Objects.equals(this.name, that.name)
-        && Objects.equals(this.token, that.token)
         && Objects.equals(this.createdAt, that.createdAt)
         && Objects.equals(this.expiresAt, that.expiresAt)
         && Objects.equals(this.lastUsed, that.lastUsed)
-        && Objects.equals(this.scopeList, that.scopeList)
-        && Objects.equals(this.impersonation, that.impersonation)
+        && Objects.equals(this.permissions, that.permissions)
+        && Objects.equals(this.tokenType, that.tokenType)
         && Objects.equals(this.active, that.active)
         && Objects.equals(this.revoked, that.revoked);
+  }
+
+  @Override
+  public String toString() {
+    return "AccessToken{"
+        + "id='"
+        + id
+        + '\''
+        + ", userId='"
+        + userId
+        + '\''
+        + ", name='"
+        + name
+        + '\''
+        + ", createdAt="
+        + createdAt
+        + ", expiresAt="
+        + expiresAt
+        + ", lastUsed="
+        + lastUsed
+        + ", permissions="
+        + permissions
+        + ", tokenType="
+        + tokenType
+        + ", active="
+        + active
+        + ", revoked="
+        + revoked
+        + '}';
   }
 
   @SuppressWarnings("PMD.TooManyMethods")
@@ -161,11 +183,9 @@ public final class AccessToken {
 
     private String id;
 
-    private String user;
+    private String userId;
 
     private String name;
-
-    private String token;
 
     private Instant createdAt;
 
@@ -173,9 +193,9 @@ public final class AccessToken {
 
     private Instant lastUsed;
 
-    private final List<String> scopeList = new ArrayList<>();
+    private final List<Permission> permissions = new ArrayList<>();
 
-    private boolean impersonation;
+    private TokenType tokenType;
 
     private boolean active = true;
 
@@ -185,33 +205,26 @@ public final class AccessToken {
 
     private Builder(AccessToken accessToken) {
       this.id = accessToken.id;
-      this.user = accessToken.user;
+      this.userId = accessToken.userId;
       this.name = accessToken.name;
-      this.token = accessToken.token;
       this.createdAt = accessToken.createdAt;
       this.expiresAt = accessToken.expiresAt;
       this.lastUsed = accessToken.lastUsed;
-      this.scopeList.addAll(accessToken.scopeList);
-      this.impersonation = accessToken.impersonation;
+      this.permissions.addAll(accessToken.permissions);
+      this.tokenType = accessToken.tokenType;
       this.active = accessToken.active;
       this.revoked = accessToken.revoked;
     }
 
     public Builder id(String id) {
       Objects.requireNonNull(id, "id is null");
-      if (!Identifier.isId(id)) {
-        throw new IllegalArgumentException(id + " is not an id");
-      }
       this.id = id;
       return this;
     }
 
-    public Builder user(String user) {
-      Objects.requireNonNull(user, "user is null");
-      if (!Identifier.isId(user)) {
-        throw new IllegalArgumentException(user + " is not an user id");
-      }
-      this.user = user;
+    public Builder userId(String userId) {
+      Objects.requireNonNull(userId, "userId is null");
+      this.userId = userId;
       return this;
     }
 
@@ -222,59 +235,36 @@ public final class AccessToken {
       return this;
     }
 
-    public Builder token(String token) {
-      Objects.requireNonNull(token, "token is null");
-      this.requireNonBlank(token, "token is blank");
-      this.token = token;
-      return this;
-    }
-
     public Builder createdAt(Instant createdAt) {
-      Objects.requireNonNull(createdAt, "createdAt is null");
       this.createdAt = createdAt;
       return this;
     }
 
     public Builder expiresAt(Instant expiresAt) {
-      Objects.requireNonNull(expiresAt, "expiresAt is null");
       this.expiresAt = expiresAt;
       return this;
     }
 
     public Builder lastUsed(Instant lastUsed) {
-      Objects.requireNonNull(lastUsed, "lastUsed is null");
       this.lastUsed = lastUsed;
       return this;
     }
 
+    public Builder permissions(Consumer<ListBuilder<Permission>> configurer) {
+      ListBuilder<Permission> listBuilder = new ListBuilder<Permission>();
+      configurer.accept(listBuilder);
+      this.permissions.clear();
+      this.permissions.addAll(listBuilder.build());
+      return this;
+    }
+
     @JsonSetter
-    public Builder scopeList(List<String> scopeList) {
-      Objects.requireNonNull(scopeList, "scopeList is null");
-      this.scopeList.clear();
-      for (String scope : scopeList) {
-        this.scope(scope);
-      }
-      return this;
+    public Builder permissions(List<Permission> permissions) {
+      return this.permissions(list -> list.addAll(permissions));
     }
 
-    public Builder scopeList(String... scopeList) {
-      Objects.requireNonNull(scopeList, "scopeList is null");
-      this.scopeList.clear();
-      for (String scope : scopeList) {
-        this.scope(scope);
-      }
-      return this;
-    }
-
-    public Builder scope(String scope) {
-      Objects.requireNonNull(scope, "scope is null");
-      this.requireNonBlank(scope, "scope is blank");
-      this.scopeList.add(scope);
-      return this;
-    }
-
-    public Builder impersonation(boolean impersonation) {
-      this.impersonation = impersonation;
+    public Builder tokenType(TokenType tokenType) {
+      this.tokenType = tokenType;
       return this;
     }
 
