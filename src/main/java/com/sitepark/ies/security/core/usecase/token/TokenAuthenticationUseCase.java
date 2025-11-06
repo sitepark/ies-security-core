@@ -1,4 +1,4 @@
-package com.sitepark.ies.security.core.usecase;
+package com.sitepark.ies.security.core.usecase.token;
 
 import com.sitepark.ies.security.core.domain.entity.AccessToken;
 import com.sitepark.ies.security.core.domain.exception.AccessTokenExpiredException;
@@ -13,7 +13,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.Optional;
 
-public class AuthenticateByToken {
+public class TokenAuthenticationUseCase {
 
   private final Clock clock;
 
@@ -22,7 +22,7 @@ public class AuthenticateByToken {
   private final UserService userService;
 
   @Inject
-  protected AuthenticateByToken(
+  protected TokenAuthenticationUseCase(
       Clock clock, AccessTokenRepository accessTokenRepository, UserService userService) {
     this.clock = clock;
     this.accessTokenRepository = accessTokenRepository;
@@ -45,9 +45,9 @@ public class AuthenticateByToken {
     }
     this.checkExpirationDate(accessToken.expiresAt());
 
-    Optional<User> user = this.userService.findById(accessToken.user());
+    Optional<User> user = this.userService.findById(accessToken.userId());
     if (user.isEmpty()) {
-      throw new InvalidAccessTokenException("User " + accessToken.user() + " not found");
+      throw new InvalidAccessTokenException("User " + accessToken.userId() + " not found");
     }
 
     return user.get();

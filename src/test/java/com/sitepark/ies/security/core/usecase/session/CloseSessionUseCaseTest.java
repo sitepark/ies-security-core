@@ -1,6 +1,5 @@
-package com.sitepark.ies.security.core.usecase;
+package com.sitepark.ies.security.core.usecase.session;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 

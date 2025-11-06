@@ -1,4 +1,4 @@
-package com.sitepark.ies.security.core.usecase;
+package com.sitepark.ies.security.core.usecase.oidc;
 
 import com.sitepark.ies.security.core.domain.value.AuthenticationResult;
 import com.sitepark.ies.security.core.domain.value.OidcUser;

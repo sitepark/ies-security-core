@@ -1,4 +1,4 @@
-package com.sitepark.ies.security.core.usecase;
+package com.sitepark.ies.security.core.usecase.token;
 
 import com.sitepark.ies.security.core.domain.entity.AccessToken;
 import com.sitepark.ies.security.core.domain.exception.InvalidAccessTokenException;
@@ -10,7 +10,7 @@ import jakarta.inject.Inject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class CreateImpersonationToken {
+public class CreateImpersonationTokenUserCase {
 
   private final AccessTokenRepository repository;
 
@@ -21,7 +21,7 @@ public class CreateImpersonationToken {
   private static final Logger LOGGER = LogManager.getLogger();
 
   @Inject
-  protected CreateImpersonationToken(
+  protected CreateImpersonationTokenUserCase(
       AccessTokenRepository repository, AccessControl accessControl, UserService userService) {
     this.repository = repository;
     this.accessControl = accessControl;

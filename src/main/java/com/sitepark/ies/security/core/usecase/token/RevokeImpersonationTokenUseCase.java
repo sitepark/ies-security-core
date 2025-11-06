@@ -1,4 +1,4 @@
-package com.sitepark.ies.security.core.usecase;
+package com.sitepark.ies.security.core.usecase.token;
 
 import com.sitepark.ies.security.core.port.AccessControl;
 import com.sitepark.ies.security.core.port.AccessTokenRepository;
@@ -7,7 +7,7 @@ import jakarta.inject.Inject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class RevokeImpersonationToken {
+public class RevokeImpersonationTokenUseCase {
 
   private final AccessTokenRepository repository;
 
@@ -16,7 +16,7 @@ public class RevokeImpersonationToken {
   private static final Logger LOGGER = LogManager.getLogger();
 
   @Inject
-  protected RevokeImpersonationToken(
+  protected RevokeImpersonationTokenUseCase(
       AccessTokenRepository repository, AccessControl accessControl) {
     this.repository = repository;
     this.accessControl = accessControl;

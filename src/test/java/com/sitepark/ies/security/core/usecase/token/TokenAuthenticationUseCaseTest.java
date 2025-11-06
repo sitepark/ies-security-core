@@ -1,4 +1,4 @@
-package com.sitepark.ies.security.core.usecase;
+package com.sitepark.ies.security.core.usecase.token;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -12,6 +12,7 @@ import com.sitepark.ies.security.core.domain.exception.AccessTokenExpiredExcepti
 import com.sitepark.ies.security.core.domain.exception.AccessTokenNotActiveException;
 import com.sitepark.ies.security.core.domain.exception.AccessTokenRevokedException;
 import com.sitepark.ies.security.core.domain.exception.InvalidAccessTokenException;
+import com.sitepark.ies.security.core.domain.value.TokenType;
 import com.sitepark.ies.security.core.port.AccessTokenRepository;
 import com.sitepark.ies.security.core.port.UserService;
 import com.sitepark.ies.sharedkernel.security.Identity;
@@ -25,7 +26,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class AuthenticateByTokenTest {
+class TokenAuthenticationUseCaseTest {
 
   private static final String TOKEN_NAME = "Test Token";
 
@@ -47,7 +48,7 @@ class AuthenticateByTokenTest {
     UserService userService = mock();
 
     var authenticateByToken =
-        new AuthenticateByToken(this.fixedClock, accessTokenRepository, userService);
+        new TokenAuthenticationUseCase(this.fixedClock, accessTokenRepository, userService);
 
     assertThrows(
         InvalidAccessTokenException.class,
@@ -60,14 +61,20 @@ class AuthenticateByTokenTest {
   void testTokenNotActive() {
 
     AccessToken accessToken =
-        AccessToken.builder().id("1").name(TOKEN_NAME).user("2").active(false).build();
+        AccessToken.builder()
+            .id("1")
+            .name(TOKEN_NAME)
+            .userId("2")
+            .tokenType(TokenType.IMPERSONATION)
+            .active(false)
+            .build();
 
     AccessTokenRepository accessTokenRepository = mock();
     when(accessTokenRepository.getByToken(any())).thenReturn(Optional.of(accessToken));
     UserService userService = mock();
 
     var authenticateByToken =
-        new AuthenticateByToken(this.fixedClock, accessTokenRepository, userService);
+        new TokenAuthenticationUseCase(this.fixedClock, accessTokenRepository, userService);
 
     assertThrows(
         AccessTokenNotActiveException.class,
@@ -80,14 +87,20 @@ class AuthenticateByTokenTest {
   void testTokenRevoked() {
 
     AccessToken accessToken =
-        AccessToken.builder().id("1").name(TOKEN_NAME).user("2").revoked(true).build();
+        AccessToken.builder()
+            .id("1")
+            .name(TOKEN_NAME)
+            .userId("2")
+            .tokenType(TokenType.IMPERSONATION)
+            .revoked(true)
+            .build();
 
     AccessTokenRepository accessTokenRepository = mock();
     when(accessTokenRepository.getByToken(any())).thenReturn(Optional.of(accessToken));
     UserService userService = mock();
 
     var authenticateByToken =
-        new AuthenticateByToken(this.fixedClock, accessTokenRepository, userService);
+        new TokenAuthenticationUseCase(this.fixedClock, accessTokenRepository, userService);
 
     assertThrows(
         AccessTokenRevokedException.class,
@@ -103,14 +116,20 @@ class AuthenticateByTokenTest {
     Instant expiredAt = Instant.now(this.fixedClock).minus(1, ChronoUnit.DAYS);
 
     AccessToken accessToken =
-        AccessToken.builder().id("1").name(TOKEN_NAME).user("2").expiresAt(expiredAt).build();
+        AccessToken.builder()
+            .id("1")
+            .name(TOKEN_NAME)
+            .userId("2")
+            .tokenType(TokenType.IMPERSONATION)
+            .expiresAt(expiredAt)
+            .build();
 
     AccessTokenRepository accessTokenRepository = mock();
     when(accessTokenRepository.getByToken(any())).thenReturn(Optional.of(accessToken));
     UserService userService = mock();
 
     var authenticateByToken =
-        new AuthenticateByToken(this.fixedClock, accessTokenRepository, userService);
+        new TokenAuthenticationUseCase(this.fixedClock, accessTokenRepository, userService);
 
     AccessTokenExpiredException e =
         assertThrows(
@@ -125,7 +144,13 @@ class AuthenticateByTokenTest {
   @Test
   void testUserNotFound() {
 
-    AccessToken accessToken = AccessToken.builder().id("1").name(TOKEN_NAME).user("2").build();
+    AccessToken accessToken =
+        AccessToken.builder()
+            .id("1")
+            .name(TOKEN_NAME)
+            .userId("2")
+            .tokenType(TokenType.IMPERSONATION)
+            .build();
 
     AccessTokenRepository accessTokenRepository = mock();
     when(accessTokenRepository.getByToken(any())).thenReturn(Optional.of(accessToken));
@@ -135,7 +160,7 @@ class AuthenticateByTokenTest {
     when(userService.findById(anyString())).thenReturn(Optional.empty());
 
     var authenticateByToken =
-        new AuthenticateByToken(this.fixedClock, accessTokenRepository, userService);
+        new TokenAuthenticationUseCase(this.fixedClock, accessTokenRepository, userService);
 
     assertThrows(
         InvalidAccessTokenException.class,
@@ -147,7 +172,13 @@ class AuthenticateByTokenTest {
   @Test
   void testValidAutentification() {
 
-    AccessToken accessToken = AccessToken.builder().id("1").name(TOKEN_NAME).user("2").build();
+    AccessToken accessToken =
+        AccessToken.builder()
+            .id("1")
+            .name(TOKEN_NAME)
+            .userId("2")
+            .tokenType(TokenType.IMPERSONATION)
+            .build();
 
     User user =
         User.builder()
@@ -167,7 +198,7 @@ class AuthenticateByTokenTest {
     when(userService.findById(anyString())).thenReturn(Optional.of(user));
 
     var authenticateByToken =
-        new AuthenticateByToken(this.fixedClock, accessTokenRepository, userService);
+        new TokenAuthenticationUseCase(this.fixedClock, accessTokenRepository, userService);
 
     User authenticatedUser = authenticateByToken.authenticateByToken(TOKEN_STRING);
     Assertions.assertEquals(user.id(), authenticatedUser.id(), "unexpected user");
@@ -179,7 +210,13 @@ class AuthenticateByTokenTest {
     Instant expiredAt = Instant.now(this.fixedClock).plus(1, ChronoUnit.DAYS);
 
     AccessToken accessToken =
-        AccessToken.builder().id("1").name(TOKEN_NAME).expiresAt(expiredAt).user("2").build();
+        AccessToken.builder()
+            .id("1")
+            .name(TOKEN_NAME)
+            .expiresAt(expiredAt)
+            .userId("2")
+            .tokenType(TokenType.IMPERSONATION)
+            .build();
 
     User user =
         User.builder()
@@ -199,7 +236,7 @@ class AuthenticateByTokenTest {
     when(userService.findById(anyString())).thenReturn(Optional.of(user));
 
     var authenticateByToken =
-        new AuthenticateByToken(this.fixedClock, accessTokenRepository, userService);
+        new TokenAuthenticationUseCase(this.fixedClock, accessTokenRepository, userService);
 
     User authenticatedUser = authenticateByToken.authenticateByToken(TOKEN_STRING);
     Assertions.assertEquals(user.id(), authenticatedUser.id(), "unexpected user");

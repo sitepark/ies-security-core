@@ -1,4 +1,4 @@
-package com.sitepark.ies.security.core.usecase;
+package com.sitepark.ies.security.core.usecase.password;
 
 import com.sitepark.ies.security.core.domain.value.AuthenticationRequirement;
 import com.sitepark.ies.security.core.domain.value.AuthenticationResult;

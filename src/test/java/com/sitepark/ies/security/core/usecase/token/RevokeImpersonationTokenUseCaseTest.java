@@ -1,4 +1,4 @@
-package com.sitepark.ies.security.core.usecase;
+package com.sitepark.ies.security.core.usecase.token;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
@@ -10,7 +10,7 @@ import com.sitepark.ies.security.core.port.AccessTokenRepository;
 import com.sitepark.ies.sharedkernel.security.AccessDeniedException;
 import org.junit.jupiter.api.Test;
 
-class RevokeImpersonationTokenTest {
+class RevokeImpersonationTokenUseCaseTest {
 
   @Test
   @SuppressWarnings("PMD.UnitTestContainsTooManyAsserts")
@@ -21,12 +21,12 @@ class RevokeImpersonationTokenTest {
     when(accessControl.isImpersonationTokensManageable()).thenReturn(false);
 
     var revokeImpersonationToken =
-        new RevokeImpersonationToken(accessTokenRepository, accessControl);
+        new RevokeImpersonationTokenUseCase(accessTokenRepository, accessControl);
 
     assertThrows(
         AccessDeniedException.class,
         () -> {
-          revokeImpersonationToken.revokeImpersonationToken("1", "2");
+          revokeImpersonationToken.revokeImpersonationToken("2");
         });
 
     verify(accessControl).isImpersonationTokensManageable();
@@ -40,10 +40,10 @@ class RevokeImpersonationTokenTest {
     when(accessControl.isImpersonationTokensManageable()).thenReturn(true);
 
     var revokeImpersonationToken =
-        new RevokeImpersonationToken(accessTokenRepository, accessControl);
+        new RevokeImpersonationTokenUseCase(accessTokenRepository, accessControl);
 
-    revokeImpersonationToken.revokeImpersonationToken("1", "2");
+    revokeImpersonationToken.revokeImpersonationToken("2");
 
-    verify(accessTokenRepository).revoke("1", "2");
+    verify(accessTokenRepository).revoke("2");
   }
 }

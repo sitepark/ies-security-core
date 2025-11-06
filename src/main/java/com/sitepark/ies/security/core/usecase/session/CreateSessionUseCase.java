@@ -1,4 +1,4 @@
-package com.sitepark.ies.security.core.usecase;
+package com.sitepark.ies.security.core.usecase.session;
 
 import com.sitepark.ies.security.core.domain.entity.Session;
 import com.sitepark.ies.security.core.port.PermissionLoader;
