@@ -36,7 +36,7 @@ class CreateSessionUseCaseTest {
 
     Session session = mock();
     when(session.id()).thenReturn("123");
-    when(this.sessionRegistry.create(any())).thenReturn(session);
+    when(this.sessionRegistry.create(any(), any())).thenReturn(session);
     when(this.permissionLoader.loadByUser(user.id())).thenReturn(List.of());
 
     assertEquals(

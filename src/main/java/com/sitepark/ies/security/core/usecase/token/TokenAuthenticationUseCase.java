@@ -5,13 +5,16 @@ import com.sitepark.ies.security.core.domain.exception.AccessTokenExpiredExcepti
 import com.sitepark.ies.security.core.domain.exception.AccessTokenNotActiveException;
 import com.sitepark.ies.security.core.domain.exception.AccessTokenRevokedException;
 import com.sitepark.ies.security.core.domain.exception.InvalidAccessTokenException;
+import com.sitepark.ies.security.core.domain.value.TokenType;
 import com.sitepark.ies.security.core.port.AccessTokenRepository;
 import com.sitepark.ies.security.core.port.PermissionLoader;
 import com.sitepark.ies.security.core.port.UserService;
 import com.sitepark.ies.sharedkernel.security.Authentication;
 import com.sitepark.ies.sharedkernel.security.Permission;
+import com.sitepark.ies.sharedkernel.security.PermissionService;
+import com.sitepark.ies.sharedkernel.security.ServiceAuthentication;
 import com.sitepark.ies.sharedkernel.security.User;
-import com.sitepark.ies.sharedkernel.security.UserBasedAuthentication;
+import com.sitepark.ies.sharedkernel.security.UserAuthentication;
 import jakarta.inject.Inject;
 import java.time.Clock;
 import java.time.Instant;
@@ -24,6 +27,8 @@ public class TokenAuthenticationUseCase {
 
   private final AccessTokenRepository accessTokenRepository;
 
+  private final PermissionService permissionService;
+
   private final PermissionLoader permissionLoader;
 
   private final UserService userService;
@@ -32,16 +37,28 @@ public class TokenAuthenticationUseCase {
   protected TokenAuthenticationUseCase(
       Clock clock,
       AccessTokenRepository accessTokenRepository,
+      PermissionService permissionService,
       PermissionLoader permissionLoader,
       UserService userService) {
     this.clock = clock;
     this.accessTokenRepository = accessTokenRepository;
+    this.permissionService = permissionService;
     this.permissionLoader = permissionLoader;
     this.userService = userService;
   }
 
   public Authentication authenticateByToken(String token) {
 
+    AccessToken accessToken = loadToken(token);
+
+    return switch (accessToken.tokenType()) {
+      case TokenType.PRIVATE, TokenType.IMPERSONATION ->
+          this.createUserBasedAuthentication(accessToken);
+      case TokenType.SERVICE -> this.createTokenBasedAuthentication(accessToken);
+    };
+  }
+
+  private AccessToken loadToken(String token) {
     Optional<AccessToken> accessTokenOpt = this.accessTokenRepository.getByToken(token);
     if (accessTokenOpt.isEmpty()) {
       throw new InvalidAccessTokenException("Token not found");
@@ -56,6 +73,10 @@ public class TokenAuthenticationUseCase {
     }
     this.checkExpirationDate(accessToken.expiresAt());
 
+    return accessToken;
+  }
+
+  private UserAuthentication createUserBasedAuthentication(AccessToken accessToken) {
     Optional<User> user = this.userService.findById(accessToken.userId());
     if (user.isEmpty()) {
       throw new InvalidAccessTokenException("User " + accessToken.userId() + " not found");
@@ -63,10 +84,17 @@ public class TokenAuthenticationUseCase {
 
     List<Permission> permissions = this.permissionLoader.loadByUser(user.get().id());
 
-    return UserBasedAuthentication.builder()
-        .user(user.get())
+    return UserAuthentication.builder().user(user.get()).permissions(permissions).build();
+  }
+
+  private ServiceAuthentication createTokenBasedAuthentication(AccessToken accessToken) {
+    List<Permission> permissions =
+        accessToken.permissions().stream()
+            .map(p -> this.permissionService.createPermission(p.type(), p.data()))
+            .toList();
+    return ServiceAuthentication.builder()
+        .name(accessToken.name())
         .permissions(permissions)
-        .purpose(accessToken.name())
         .build();
   }
 

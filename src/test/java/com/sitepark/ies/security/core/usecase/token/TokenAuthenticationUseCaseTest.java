@@ -17,8 +17,9 @@ import com.sitepark.ies.security.core.port.AccessTokenRepository;
 import com.sitepark.ies.security.core.port.PermissionLoader;
 import com.sitepark.ies.security.core.port.UserService;
 import com.sitepark.ies.sharedkernel.security.Identity;
+import com.sitepark.ies.sharedkernel.security.PermissionService;
 import com.sitepark.ies.sharedkernel.security.User;
-import com.sitepark.ies.sharedkernel.security.UserBasedAuthentication;
+import com.sitepark.ies.sharedkernel.security.UserAuthentication;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.OffsetDateTime;
@@ -45,6 +46,7 @@ class TokenAuthenticationUseCaseTest {
   @BeforeEach
   void setUp() {
     this.accessTokenRepository = mock();
+    PermissionService permissionService = mock();
     PermissionLoader permissionLoader = mock();
     this.userService = mock();
     OffsetDateTime fixedTime = OffsetDateTime.parse("2024-06-13T12:00:00+02:00");
@@ -52,7 +54,11 @@ class TokenAuthenticationUseCaseTest {
 
     this.useCase =
         new TokenAuthenticationUseCase(
-            this.fixedClock, accessTokenRepository, permissionLoader, this.userService);
+            this.fixedClock,
+            accessTokenRepository,
+            permissionService,
+            permissionLoader,
+            this.userService);
   }
 
   @Test
@@ -181,8 +187,8 @@ class TokenAuthenticationUseCaseTest {
     when(this.accessTokenRepository.getByToken(any())).thenReturn(Optional.of(accessToken));
     when(this.userService.findById(anyString())).thenReturn(Optional.of(user));
 
-    UserBasedAuthentication authentication =
-        (UserBasedAuthentication) this.useCase.authenticateByToken(TOKEN_STRING);
+    UserAuthentication authentication =
+        (UserAuthentication) this.useCase.authenticateByToken(TOKEN_STRING);
     Assertions.assertEquals(user.id(), authentication.user().id(), "unexpected user");
   }
 
@@ -213,8 +219,8 @@ class TokenAuthenticationUseCaseTest {
     when(this.accessTokenRepository.getByToken(any())).thenReturn(Optional.of(accessToken));
     when(this.userService.findById(anyString())).thenReturn(Optional.of(user));
 
-    UserBasedAuthentication authentication =
-        (UserBasedAuthentication) this.useCase.authenticateByToken(TOKEN_STRING);
+    UserAuthentication authentication =
+        (UserAuthentication) this.useCase.authenticateByToken(TOKEN_STRING);
     Assertions.assertEquals(user.id(), authentication.user().id(), "unexpected user");
   }
 }

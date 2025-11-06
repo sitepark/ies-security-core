@@ -5,7 +5,7 @@ import com.sitepark.ies.security.core.port.PermissionLoader;
 import com.sitepark.ies.security.core.port.SessionRegistry;
 import com.sitepark.ies.sharedkernel.security.Permission;
 import com.sitepark.ies.sharedkernel.security.User;
-import com.sitepark.ies.sharedkernel.security.UserBasedAuthentication;
+import com.sitepark.ies.sharedkernel.security.UserAuthentication;
 import jakarta.inject.Inject;
 import java.util.List;
 
@@ -26,14 +26,13 @@ public class CreateSessionUseCase {
 
     List<Permission> permissions = this.permissionLoader.loadByUser(user.id());
 
-    UserBasedAuthentication authentication =
-        UserBasedAuthentication.builder()
+    UserAuthentication authentication =
+        UserAuthentication.builder()
             .user(user.toBuilder().build())
             .permissions(permissions)
-            .purpose(purpose)
             .build();
 
-    Session session = this.sessionRegistry.create(authentication);
+    Session session = this.sessionRegistry.create(authentication, purpose);
     return session.id();
   }
 }

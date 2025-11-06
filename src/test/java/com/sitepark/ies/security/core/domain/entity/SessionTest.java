@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
 import com.jparams.verifier.tostring.ToStringVerifier;
-import com.sitepark.ies.sharedkernel.security.UserBasedAuthentication;
+import com.sitepark.ies.sharedkernel.security.UserAuthentication;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -65,7 +65,7 @@ class SessionTest {
 
   @Test
   void testAuthentication() {
-    UserBasedAuthentication authentication = mock();
+    UserAuthentication authentication = mock();
     Session session = Session.builder().authentication(authentication).build();
     assertEquals(
         authentication,
@@ -83,7 +83,7 @@ class SessionTest {
 
   @Test
   void testToBuilder() {
-    UserBasedAuthentication authentication = mock();
+    UserAuthentication authentication = mock();
     Session session =
         Session.builder()
             .id("1")

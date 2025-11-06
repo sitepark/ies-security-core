@@ -1,7 +1,6 @@
 package com.sitepark.ies.security.core.usecase.token;
 
 import com.sitepark.ies.security.core.domain.entity.AccessToken;
-import com.sitepark.ies.security.core.domain.exception.InvalidAccessTokenException;
 import com.sitepark.ies.security.core.domain.value.TokenType;
 import com.sitepark.ies.security.core.port.AccessControl;
 import com.sitepark.ies.security.core.port.AccessTokenRepository;
@@ -13,7 +12,7 @@ import java.time.Clock;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class CreateImpersonationTokenUserCase {
+public class CreateServiceTokenUserCase {
 
   private final AccessTokenRepository repository;
 
@@ -21,14 +20,12 @@ public class CreateImpersonationTokenUserCase {
 
   private final TokenService tokenService;
 
-  private final UserService userService;
-
   private final Clock clock;
 
   private static final Logger LOGGER = LogManager.getLogger();
 
   @Inject
-  protected CreateImpersonationTokenUserCase(
+  protected CreateServiceTokenUserCase(
       AccessTokenRepository repository,
       AccessControl accessControl,
       TokenService tokenService,
@@ -37,18 +34,13 @@ public class CreateImpersonationTokenUserCase {
     this.repository = repository;
     this.accessControl = accessControl;
     this.tokenService = tokenService;
-    this.userService = userService;
     this.clock = clock;
   }
 
-  public CreateTokenResult createImpersonationToken(CreateImpersonationTokenRequest request) {
+  public CreateTokenResult createServiceToken(CreateServiceTokenRequest request) {
 
     if (!this.accessControl.isImpersonationTokensManageable()) {
-      throw new AccessDeniedException("Not allowed manage impersonation tokens");
-    }
-
-    if (this.userService.findById(request.userId()).isEmpty()) {
-      throw new InvalidAccessTokenException("user " + request.userId() + " not found");
+      throw new AccessDeniedException("Not allowed manage service tokens");
     }
 
     String token = this.tokenService.generateToken();
@@ -56,11 +48,11 @@ public class CreateImpersonationTokenUserCase {
 
     AccessToken accessToken =
         AccessToken.builder()
-            .userId(request.userId())
             .name(request.name())
+            .permissions(request.permissions())
             .createdAt(this.clock.instant())
             .expiresAt(request.expiresAt())
-            .tokenType(TokenType.IMPERSONATION)
+            .tokenType(TokenType.SERVICE)
             .build();
 
     if (LOGGER.isInfoEnabled()) {

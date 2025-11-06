@@ -7,7 +7,7 @@ import jakarta.inject.Inject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class RevokeImpersonationTokenUseCase {
+public class RevokeTokenUseCase {
 
   private final AccessTokenRepository repository;
 
@@ -16,8 +16,7 @@ public class RevokeImpersonationTokenUseCase {
   private static final Logger LOGGER = LogManager.getLogger();
 
   @Inject
-  protected RevokeImpersonationTokenUseCase(
-      AccessTokenRepository repository, AccessControl accessControl) {
+  protected RevokeTokenUseCase(AccessTokenRepository repository, AccessControl accessControl) {
     this.repository = repository;
     this.accessControl = accessControl;
   }

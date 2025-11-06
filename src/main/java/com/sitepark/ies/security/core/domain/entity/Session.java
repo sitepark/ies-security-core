@@ -1,6 +1,6 @@
 package com.sitepark.ies.security.core.domain.entity;
 
-import com.sitepark.ies.sharedkernel.security.UserBasedAuthentication;
+import com.sitepark.ies.sharedkernel.security.UserAuthentication;
 import java.time.Instant;
 import java.util.Objects;
 
@@ -11,12 +11,15 @@ public final class Session {
 
   private final Instant createdAt;
 
-  private final UserBasedAuthentication authentication;
+  private final UserAuthentication authentication;
+
+  private final String purpose;
 
   private Session(Builder builder) {
     this.id = builder.id;
     this.createdAt = builder.createdAt;
     this.authentication = builder.authentication;
+    this.purpose = Objects.requireNonNull(builder.purpose, "purpose cannot be null");
   }
 
   public String id() {
@@ -27,7 +30,7 @@ public final class Session {
     return this.createdAt;
   }
 
-  public UserBasedAuthentication authentication() {
+  public UserAuthentication authentication() {
     return this.authentication;
   }
 
@@ -41,7 +44,7 @@ public final class Session {
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, createdAt, authentication);
+    return Objects.hash(id, createdAt, authentication, purpose);
   }
 
   @Override
@@ -51,7 +54,8 @@ public final class Session {
     }
     return Objects.equals(id, that.id)
         && Objects.equals(createdAt, that.createdAt)
-        && Objects.equals(authentication, that.authentication);
+        && Objects.equals(authentication, that.authentication)
+        && Objects.equals(purpose, that.purpose);
   }
 
   @Override
@@ -64,6 +68,9 @@ public final class Session {
         + createdAt
         + ", authentication="
         + authentication
+        + ", purpose='"
+        + purpose
+        + '\''
         + '}';
   }
 
@@ -73,7 +80,9 @@ public final class Session {
 
     private Instant createdAt;
 
-    private UserBasedAuthentication authentication;
+    private UserAuthentication authentication;
+
+    private String purpose;
 
     private Builder() {}
 
@@ -81,6 +90,7 @@ public final class Session {
       this.id = session.id;
       this.createdAt = session.createdAt;
       this.authentication = session.authentication;
+      this.purpose = session.purpose;
     }
 
     public Builder id(String id) {
@@ -98,9 +108,18 @@ public final class Session {
       return this;
     }
 
-    public Builder authentication(UserBasedAuthentication authentication) {
+    public Builder authentication(UserAuthentication authentication) {
       Objects.requireNonNull(authentication, "authentication cannot be null");
       this.authentication = authentication;
+      return this;
+    }
+
+    public Builder purpose(String purpose) {
+      Objects.requireNonNull(purpose, "purpose cannot be null");
+      if (purpose.isBlank()) {
+        throw new IllegalArgumentException("purpose must not be blank");
+      }
+      this.purpose = purpose;
       return this;
     }
 

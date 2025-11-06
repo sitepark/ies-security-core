@@ -19,6 +19,7 @@ module com.sitepark.ies.security.core {
   requires com.sitepark.ies.sharedkernel;
   requires static com.github.spotbugs.annotations;
   requires static org.jetbrains.annotations;
+  requires jsr305;
 
   opens com.sitepark.ies.security.core.port;
   opens com.sitepark.ies.security.core.domain.entity;

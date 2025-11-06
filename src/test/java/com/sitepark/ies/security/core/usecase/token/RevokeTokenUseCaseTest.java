@@ -10,7 +10,7 @@ import com.sitepark.ies.security.core.port.AccessTokenRepository;
 import com.sitepark.ies.sharedkernel.security.AccessDeniedException;
 import org.junit.jupiter.api.Test;
 
-class RevokeImpersonationTokenUseCaseTest {
+class RevokeTokenUseCaseTest {
 
   @Test
   @SuppressWarnings("PMD.UnitTestContainsTooManyAsserts")
@@ -20,8 +20,7 @@ class RevokeImpersonationTokenUseCaseTest {
     AccessControl accessControl = mock(AccessControl.class);
     when(accessControl.isImpersonationTokensManageable()).thenReturn(false);
 
-    var revokeImpersonationToken =
-        new RevokeImpersonationTokenUseCase(accessTokenRepository, accessControl);
+    var revokeImpersonationToken = new RevokeTokenUseCase(accessTokenRepository, accessControl);
 
     assertThrows(
         AccessDeniedException.class,
@@ -39,8 +38,7 @@ class RevokeImpersonationTokenUseCaseTest {
     AccessControl accessControl = mock(AccessControl.class);
     when(accessControl.isImpersonationTokensManageable()).thenReturn(true);
 
-    var revokeImpersonationToken =
-        new RevokeImpersonationTokenUseCase(accessTokenRepository, accessControl);
+    var revokeImpersonationToken = new RevokeTokenUseCase(accessTokenRepository, accessControl);
 
     revokeImpersonationToken.revokeImpersonationToken("2");
 
