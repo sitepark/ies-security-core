@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sitepark.ies.security.core.domain.value.TokenType;
 import com.sitepark.ies.sharedkernel.base.ListBuilder;
-import com.sitepark.ies.sharedkernel.security.PermissionPayload;
+import com.sitepark.ies.sharedkernel.security.Permission;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +32,7 @@ public final class AccessToken {
 
   @Nullable private final Instant lastUsed;
 
-  @NotNull private final List<PermissionPayload> permissions;
+  @NotNull private final List<Permission> permissions;
 
   private final TokenType tokenType;
 
@@ -87,7 +87,7 @@ public final class AccessToken {
   }
 
   @JsonProperty
-  public List<PermissionPayload> permissions() {
+  public List<Permission> permissions() {
     return List.copyOf(this.permissions);
   }
 
@@ -193,7 +193,7 @@ public final class AccessToken {
 
     private Instant lastUsed;
 
-    private final List<PermissionPayload> permissions = new ArrayList<>();
+    private final List<Permission> permissions = new ArrayList<>();
 
     private TokenType tokenType;
 
@@ -250,8 +250,8 @@ public final class AccessToken {
       return this;
     }
 
-    public Builder permissions(Consumer<ListBuilder<PermissionPayload>> configurer) {
-      ListBuilder<PermissionPayload> listBuilder = new ListBuilder<>();
+    public Builder permissions(Consumer<ListBuilder<Permission>> configurer) {
+      ListBuilder<Permission> listBuilder = new ListBuilder<>();
       configurer.accept(listBuilder);
       this.permissions.clear();
       this.permissions.addAll(listBuilder.build());
@@ -259,7 +259,7 @@ public final class AccessToken {
     }
 
     @JsonSetter
-    public Builder permissions(List<PermissionPayload> permissions) {
+    public Builder permissions(List<Permission> permissions) {
       return this.permissions(list -> list.addAll(permissions));
     }
 

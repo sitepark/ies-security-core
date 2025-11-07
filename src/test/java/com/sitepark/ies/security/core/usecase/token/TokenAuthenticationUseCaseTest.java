@@ -17,7 +17,6 @@ import com.sitepark.ies.security.core.port.AccessTokenRepository;
 import com.sitepark.ies.security.core.port.PermissionLoader;
 import com.sitepark.ies.security.core.port.UserService;
 import com.sitepark.ies.sharedkernel.security.Identity;
-import com.sitepark.ies.sharedkernel.security.PermissionService;
 import com.sitepark.ies.sharedkernel.security.User;
 import com.sitepark.ies.sharedkernel.security.UserAuthentication;
 import java.time.Clock;
@@ -46,7 +45,6 @@ class TokenAuthenticationUseCaseTest {
   @BeforeEach
   void setUp() {
     this.accessTokenRepository = mock();
-    PermissionService permissionService = mock();
     PermissionLoader permissionLoader = mock();
     this.userService = mock();
     OffsetDateTime fixedTime = OffsetDateTime.parse("2024-06-13T12:00:00+02:00");
@@ -54,11 +52,7 @@ class TokenAuthenticationUseCaseTest {
 
     this.useCase =
         new TokenAuthenticationUseCase(
-            this.fixedClock,
-            accessTokenRepository,
-            permissionService,
-            permissionLoader,
-            this.userService);
+            this.fixedClock, accessTokenRepository, permissionLoader, this.userService);
   }
 
   @Test
