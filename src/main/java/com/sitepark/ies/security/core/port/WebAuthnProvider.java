@@ -18,4 +18,6 @@ public interface WebAuthnProvider {
   List<WebAuthnRegisteredCredential> findRegisteredCredentialByUserId(String userId);
 
   void removeRegisteredCredential(String id);
+
+  String getUserIdById(String id);
 }

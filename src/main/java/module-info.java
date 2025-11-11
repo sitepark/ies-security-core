@@ -2,6 +2,7 @@ module com.sitepark.ies.security.core {
   exports com.sitepark.ies.security.core.domain.entity;
   exports com.sitepark.ies.security.core.domain.value;
   exports com.sitepark.ies.security.core.domain.exception;
+  exports com.sitepark.ies.security.core.domain.service;
   exports com.sitepark.ies.security.core.port;
   exports com.sitepark.ies.security.core.usecase.totp;
   exports com.sitepark.ies.security.core.usecase.webauthn;

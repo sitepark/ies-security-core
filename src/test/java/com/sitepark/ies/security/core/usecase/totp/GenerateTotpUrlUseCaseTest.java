@@ -6,9 +6,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.sitepark.ies.security.core.domain.service.AccessControl;
 import com.sitepark.ies.security.core.domain.value.TotpUrl;
 import com.sitepark.ies.security.core.domain.value.VaultEntryNames;
-import com.sitepark.ies.security.core.port.AccessControl;
 import com.sitepark.ies.security.core.port.TotpProvider;
 import com.sitepark.ies.security.core.port.UserService;
 import com.sitepark.ies.security.core.port.Vault;

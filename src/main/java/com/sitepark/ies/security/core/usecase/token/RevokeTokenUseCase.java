@@ -1,6 +1,6 @@
 package com.sitepark.ies.security.core.usecase.token;
 
-import com.sitepark.ies.security.core.port.AccessControl;
+import com.sitepark.ies.security.core.domain.service.AccessControl;
 import com.sitepark.ies.security.core.port.AccessTokenRepository;
 import com.sitepark.ies.sharedkernel.security.AccessDeniedException;
 import jakarta.inject.Inject;

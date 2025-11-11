@@ -3,8 +3,8 @@ package com.sitepark.ies.security.core.usecase.totp;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import com.sitepark.ies.security.core.domain.service.AccessControl;
 import com.sitepark.ies.security.core.domain.value.VaultEntryNames;
-import com.sitepark.ies.security.core.port.AccessControl;
 import com.sitepark.ies.security.core.port.Vault;
 import com.sitepark.ies.security.core.port.VaultProvider;
 import com.sitepark.ies.sharedkernel.security.AccessDeniedException;

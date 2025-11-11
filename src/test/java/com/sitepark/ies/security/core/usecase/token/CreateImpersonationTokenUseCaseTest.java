@@ -8,7 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.sitepark.ies.security.core.domain.exception.InvalidAccessTokenException;
-import com.sitepark.ies.security.core.port.AccessControl;
+import com.sitepark.ies.security.core.domain.service.AccessControl;
 import com.sitepark.ies.security.core.port.AccessTokenRepository;
 import com.sitepark.ies.security.core.port.TokenService;
 import com.sitepark.ies.security.core.port.UserService;

@@ -146,9 +146,9 @@ class AccessTokenTest {
 
     Instant lastUsed = LocalDate.of(2023, 8, 21).atStartOfDay().atZone(ZONE_ID).toInstant();
 
-    AccessToken accessToken = this.createBuilderWithRequiredValues().lastUsed(lastUsed).build();
+    AccessToken accessToken = this.createBuilderWithRequiredValues().lastUsedAt(lastUsed).build();
 
-    assertEquals(lastUsed, accessToken.lastUsed(), "unexpected lastUsed");
+    assertEquals(lastUsed, accessToken.lastUsedAt(), "unexpected lastUsed");
   }
 
   @Test
@@ -185,7 +185,7 @@ class AccessTokenTest {
     mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     Instant createdAt = LocalDate.of(2023, 8, 21).atStartOfDay().atZone(ZONE_ID).toInstant();
     Instant expiredAt = LocalDate.of(2023, 12, 12).atStartOfDay().atZone(ZONE_ID).toInstant();
-    Instant lastUpdate = LocalDate.of(2023, 8, 25).atStartOfDay().atZone(ZONE_ID).toInstant();
+    Instant lastUsedAt = LocalDate.of(2023, 8, 25).atStartOfDay().atZone(ZONE_ID).toInstant();
 
     AccessToken accessToken =
         AccessToken.builder()
@@ -194,7 +194,7 @@ class AccessTokenTest {
             .name(TOKEN_NAME)
             .createdAt(createdAt)
             .expiresAt(expiredAt)
-            .lastUsed(lastUpdate)
+            .lastUsedAt(lastUsedAt)
             .tokenType(TokenType.IMPERSONATION)
             .build();
 
@@ -245,7 +245,7 @@ class AccessTokenTest {
 
     Instant createdAt = LocalDate.of(2023, 8, 21).atStartOfDay().atZone(ZONE_ID).toInstant();
     Instant expiredAt = LocalDate.of(2023, 12, 12).atStartOfDay().atZone(ZONE_ID).toInstant();
-    Instant lastUpdate = LocalDate.of(2023, 8, 25).atStartOfDay().atZone(ZONE_ID).toInstant();
+    Instant lastUsedAt = LocalDate.of(2023, 8, 25).atStartOfDay().atZone(ZONE_ID).toInstant();
 
     AccessToken expected =
         AccessToken.builder()
@@ -254,7 +254,7 @@ class AccessTokenTest {
             .name(TOKEN_NAME)
             .createdAt(createdAt)
             .expiresAt(expiredAt)
-            .lastUsed(lastUpdate)
+            .lastUsedAt(lastUsedAt)
             .tokenType(TokenType.IMPERSONATION)
             .build();
 

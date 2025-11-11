@@ -1,8 +1,8 @@
 package com.sitepark.ies.security.core.usecase.token;
 
 import com.sitepark.ies.security.core.domain.entity.AccessToken;
+import com.sitepark.ies.security.core.domain.service.AccessControl;
 import com.sitepark.ies.security.core.domain.value.TokenType;
-import com.sitepark.ies.security.core.port.AccessControl;
 import com.sitepark.ies.security.core.port.AccessTokenRepository;
 import com.sitepark.ies.security.core.port.TokenService;
 import com.sitepark.ies.security.core.port.UserService;

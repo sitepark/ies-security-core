@@ -1,8 +1,8 @@
 package com.sitepark.ies.security.core.usecase.totp;
 
+import com.sitepark.ies.security.core.domain.service.AccessControl;
 import com.sitepark.ies.security.core.domain.value.TotpUrl;
 import com.sitepark.ies.security.core.domain.value.VaultEntryNames;
-import com.sitepark.ies.security.core.port.AccessControl;
 import com.sitepark.ies.security.core.port.TotpProvider;
 import com.sitepark.ies.security.core.port.UserService;
 import com.sitepark.ies.security.core.port.VaultProvider;

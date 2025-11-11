@@ -6,7 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.sitepark.ies.security.core.domain.entity.WebAuthnRegisteredCredential;
-import com.sitepark.ies.security.core.port.AccessControl;
+import com.sitepark.ies.security.core.domain.service.AccessControl;
 import com.sitepark.ies.security.core.port.WebAuthnProvider;
 import com.sitepark.ies.sharedkernel.security.AccessDeniedException;
 import java.util.List;

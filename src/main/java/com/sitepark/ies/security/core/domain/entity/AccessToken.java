@@ -30,7 +30,7 @@ public final class AccessToken {
 
   @Nullable private final Instant expiresAt;
 
-  @Nullable private final Instant lastUsed;
+  @Nullable private final Instant lastUsedAt;
 
   @NotNull private final List<Permission> permissions;
 
@@ -46,7 +46,7 @@ public final class AccessToken {
     this.name = builder.name;
     this.createdAt = builder.createdAt;
     this.expiresAt = builder.expiresAt;
-    this.lastUsed = builder.lastUsed;
+    this.lastUsedAt = builder.lastUsedAt;
     this.permissions = List.copyOf(builder.permissions);
     this.tokenType = builder.tokenType;
     this.active = builder.active;
@@ -82,8 +82,8 @@ public final class AccessToken {
   }
 
   @JsonProperty
-  public Instant lastUsed() {
-    return this.lastUsed;
+  public Instant lastUsedAt() {
+    return this.lastUsedAt;
   }
 
   @JsonProperty
@@ -122,7 +122,7 @@ public final class AccessToken {
         this.name,
         this.createdAt,
         this.expiresAt,
-        this.lastUsed,
+        this.lastUsedAt,
         this.permissions,
         this.tokenType,
         this.active,
@@ -141,7 +141,7 @@ public final class AccessToken {
         && Objects.equals(this.name, that.name)
         && Objects.equals(this.createdAt, that.createdAt)
         && Objects.equals(this.expiresAt, that.expiresAt)
-        && Objects.equals(this.lastUsed, that.lastUsed)
+        && Objects.equals(this.lastUsedAt, that.lastUsedAt)
         && Objects.equals(this.permissions, that.permissions)
         && Objects.equals(this.tokenType, that.tokenType)
         && Objects.equals(this.active, that.active)
@@ -164,8 +164,8 @@ public final class AccessToken {
         + createdAt
         + ", expiresAt="
         + expiresAt
-        + ", lastUsed="
-        + lastUsed
+        + ", lastUsedAt="
+        + lastUsedAt
         + ", permissions="
         + permissions
         + ", tokenType="
@@ -191,7 +191,7 @@ public final class AccessToken {
 
     private Instant expiresAt;
 
-    private Instant lastUsed;
+    private Instant lastUsedAt;
 
     private final List<Permission> permissions = new ArrayList<>();
 
@@ -209,7 +209,7 @@ public final class AccessToken {
       this.name = accessToken.name;
       this.createdAt = accessToken.createdAt;
       this.expiresAt = accessToken.expiresAt;
-      this.lastUsed = accessToken.lastUsed;
+      this.lastUsedAt = accessToken.lastUsedAt;
       this.permissions.addAll(accessToken.permissions);
       this.tokenType = accessToken.tokenType;
       this.active = accessToken.active;
@@ -245,8 +245,8 @@ public final class AccessToken {
       return this;
     }
 
-    public Builder lastUsed(Instant lastUsed) {
-      this.lastUsed = lastUsed;
+    public Builder lastUsedAt(Instant lastUsedAt) {
+      this.lastUsedAt = lastUsedAt;
       return this;
     }
 

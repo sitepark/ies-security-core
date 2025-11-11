@@ -1,6 +1,6 @@
 package com.sitepark.ies.security.core.usecase.password;
 
-import com.sitepark.ies.security.core.port.AccessControl;
+import com.sitepark.ies.security.core.domain.service.AccessControl;
 import com.sitepark.ies.security.core.port.UserService;
 import com.sitepark.ies.sharedkernel.security.AccessDeniedException;
 import com.sitepark.ies.sharedkernel.security.PasswordEncoder;

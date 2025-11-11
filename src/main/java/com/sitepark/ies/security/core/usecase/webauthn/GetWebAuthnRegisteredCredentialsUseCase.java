@@ -1,7 +1,7 @@
 package com.sitepark.ies.security.core.usecase.webauthn;
 
 import com.sitepark.ies.security.core.domain.entity.WebAuthnRegisteredCredential;
-import com.sitepark.ies.security.core.port.AccessControl;
+import com.sitepark.ies.security.core.domain.service.AccessControl;
 import com.sitepark.ies.security.core.port.WebAuthnProvider;
 import com.sitepark.ies.sharedkernel.security.AccessDeniedException;
 import jakarta.inject.Inject;

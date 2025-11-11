@@ -68,6 +68,8 @@ public class TokenAuthenticationUseCase {
     }
     this.checkExpirationDate(accessToken.expiresAt());
 
+    this.accessTokenRepository.touch(accessToken.id());
+
     return accessToken;
   }
 
