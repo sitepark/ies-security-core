@@ -208,7 +208,7 @@ class AccessTokenTest {
         "name":"Test Token",\
         "createdAt":"2023-08-20T22:00:00Z",\
         "expiresAt":"2023-12-11T23:00:00Z",\
-        "lastUsed":"2023-08-24T22:00:00Z",\
+        "lastUsedAt":"2023-08-24T22:00:00Z",\
         "tokenType":"IMPERSONATION",\
         "active":true,\
         "revoked":false\
@@ -234,7 +234,7 @@ class AccessTokenTest {
         "name":"Test Token",\
         "createdAt":"2023-08-21T00:00:00+02:00",\
         "expiresAt":"2023-12-12T00:00:00+01:00",\
-        "lastUsed":"2023-08-25T00:00:00+02:00",\
+        "lastUsedAt":"2023-08-25T00:00:00+02:00",\
         "tokenType":"IMPERSONATION",\
         "active":true,\
         "revoked":false\
