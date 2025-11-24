@@ -89,7 +89,7 @@ class PasswordAuthenticationUseCaseTest {
     assertEquals(
         AuthenticationResult.failure(),
         this.useCase.passwordAuthentication("username", "password", "purpose"),
-        "Expected failure due to user having no password");
+        "Expected failure due to user having no newPassword");
   }
 
   @Test
@@ -103,7 +103,7 @@ class PasswordAuthenticationUseCaseTest {
     assertEquals(
         AuthenticationResult.failure(),
         this.useCase.passwordAuthentication("username", "password", "purpose"),
-        "Expected failure due to password not matching");
+        "Expected failure due to newPassword not matching");
   }
 
   @Test
@@ -183,7 +183,7 @@ class PasswordAuthenticationUseCaseTest {
     assertEquals(
         AuthenticationResult.failure(),
         this.useCase.passwordAuthentication("username", "password", "purpose"),
-        "Expected failure due to password not matching");
+        "Expected failure due to newPassword not matching");
   }
 
   @Test
