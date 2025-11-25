@@ -413,6 +413,16 @@
 				</configuration>
 				<executions>
 					<execution>
+						<id>spotless-apply</id>
+						<goals>
+							<goal>apply</goal>
+						</goals>
+						<phase>process-sources</phase>
+						<configuration>
+							<skip>${spotless.apply.skip}</skip>
+						</configuration>
+					</execution>
+					<execution>
 						<?m2e ignore?>
 						<id>spotless-check</id>
 						<goals>
@@ -478,6 +488,17 @@
 		</plugins>
 	</build>
 	<profiles>
+		<profile>
+			<id>ci</id>
+			<activation>
+				<property>
+					<name>env.CI</name>
+				</property>
+			</activation>
+			<properties>
+				<spotless.apply.skip>true</spotless.apply.skip>
+			</properties>
+		</profile>
 		<profile>
 			<id>publish-release</id>
 			<build>
