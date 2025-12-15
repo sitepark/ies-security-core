@@ -22,6 +22,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -150,8 +151,8 @@ class PasswordAuthenticationUseCaseTest {
     when(this.userService.getPasswordHash(any())).thenReturn(Optional.of("hashedPassword"));
     when(this.passwordEncoder.matches(any(), any())).thenReturn(true);
     when(this.authenticationProcessStore.store(any())).thenReturn("123");
-    AuthenticationRequirement[] requirements =
-        new AuthenticationRequirement[] {AuthenticationRequirement.TOTP_CODE_REQUIRED};
+    List<AuthenticationRequirement> requirements =
+        List.of(AuthenticationRequirement.TOTP_CODE_REQUIRED);
 
     AuthenticationResult expectedResult = AuthenticationResult.partial("123", requirements);
 

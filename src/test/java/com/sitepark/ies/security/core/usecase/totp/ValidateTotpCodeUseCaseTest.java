@@ -14,6 +14,7 @@ import com.sitepark.ies.security.core.port.TotpProvider;
 import com.sitepark.ies.security.core.port.Vault;
 import com.sitepark.ies.security.core.port.VaultProvider;
 import com.sitepark.ies.sharedkernel.security.User;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,11 +50,7 @@ class ValidateTotpCodeUseCaseTest {
   void testCodeNotRequired() {
     PartialAuthenticationState authState =
         new PartialAuthenticationState(
-            null,
-            null,
-            new AuthenticationRequirement[] {AuthenticationRequirement.PASSKEY_CHALLENGE_REQUIRED},
-            null,
-            null);
+            null, null, List.of(AuthenticationRequirement.PASSKEY_CHALLENGE_REQUIRED), null, null);
 
     when(this.authenticationProcessStore.retrieve(any())).thenReturn(Optional.of(authState));
 
@@ -70,11 +67,7 @@ class ValidateTotpCodeUseCaseTest {
     User user = User.builder().id("123").username("peterpan").lastName("Pan").build();
     PartialAuthenticationState authState =
         new PartialAuthenticationState(
-            user,
-            null,
-            new AuthenticationRequirement[] {AuthenticationRequirement.TOTP_CODE_REQUIRED},
-            null,
-            null);
+            user, null, List.of(AuthenticationRequirement.TOTP_CODE_REQUIRED), null, null);
 
     Vault userVault = mock();
     when(this.vaultProvider.getUserVault(any())).thenReturn(userVault);
@@ -94,11 +87,7 @@ class ValidateTotpCodeUseCaseTest {
     User user = User.builder().id("123").username("peterpan").lastName("Pan").build();
     PartialAuthenticationState authState =
         new PartialAuthenticationState(
-            user,
-            null,
-            new AuthenticationRequirement[] {AuthenticationRequirement.TOTP_CODE_REQUIRED},
-            null,
-            "purpose");
+            user, null, List.of(AuthenticationRequirement.TOTP_CODE_REQUIRED), null, "purpose");
 
     Vault userVault = mock();
     when(this.vaultProvider.getUserVault(any())).thenReturn(userVault);
@@ -120,10 +109,9 @@ class ValidateTotpCodeUseCaseTest {
         new PartialAuthenticationState(
             user,
             null,
-            new AuthenticationRequirement[] {
-              AuthenticationRequirement.TOTP_CODE_REQUIRED,
-              AuthenticationRequirement.PASSKEY_CHALLENGE_REQUIRED
-            },
+            List.of(
+                AuthenticationRequirement.TOTP_CODE_REQUIRED,
+                AuthenticationRequirement.PASSKEY_CHALLENGE_REQUIRED),
             null,
             null);
 
@@ -136,8 +124,7 @@ class ValidateTotpCodeUseCaseTest {
 
     assertEquals(
         AuthenticationResult.partial(
-            "testProcessId",
-            new AuthenticationRequirement[] {AuthenticationRequirement.PASSKEY_CHALLENGE_REQUIRED}),
+            "testProcessId", List.of(AuthenticationRequirement.PASSKEY_CHALLENGE_REQUIRED)),
         this.useCase.validateTotpCode("testProcessId", 123456),
         "Expected successful TOTP code validation");
   }

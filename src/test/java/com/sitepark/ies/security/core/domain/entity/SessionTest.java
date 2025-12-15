@@ -64,6 +64,28 @@ class SessionTest {
   }
 
   @Test
+  void testPurpose() {
+    Session session = Session.builder().purpose("test").build();
+    assertEquals("test", session.purpose(), "Session purpose should match the provided purpose");
+  }
+
+  @Test
+  void testPurposeIsNull() {
+    assertThrows(
+        NullPointerException.class,
+        () -> Session.builder().purpose(null),
+        "Session purpose should not be null");
+  }
+
+  @Test
+  void testPurposeIsBlank() {
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> Session.builder().purpose(""),
+        "Session purpose should not be blank");
+  }
+
+  @Test
   void testAuthentication() {
     UserAuthentication authentication = mock();
     Session session = Session.builder().authentication(authentication).purpose("test").build();

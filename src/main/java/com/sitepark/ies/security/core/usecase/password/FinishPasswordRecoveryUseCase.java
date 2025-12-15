@@ -1,26 +1,28 @@
 package com.sitepark.ies.security.core.usecase.password;
 
-import com.sitepark.ies.security.core.domain.exception.CodeVerificationFailedException;
 import com.sitepark.ies.security.core.domain.exception.FinishPasswordRecoveryException;
-import com.sitepark.ies.security.core.domain.service.AccessControl;
 import com.sitepark.ies.security.core.domain.service.SetPasswordService;
-import com.sitepark.ies.security.core.domain.value.CodeVerificationChallenge;
-import com.sitepark.ies.security.core.port.CodeVerificationService;
 import com.sitepark.ies.security.core.port.UserService;
 import com.sitepark.ies.sharedkernel.email.Email;
 import com.sitepark.ies.sharedkernel.email.EmailAddress;
 import com.sitepark.ies.sharedkernel.email.EmailMessage;
+import com.sitepark.ies.sharedkernel.email.EmailMessageTypeIdentifier;
 import com.sitepark.ies.sharedkernel.email.EmailSendException;
 import com.sitepark.ies.sharedkernel.email.EmailService;
-import com.sitepark.ies.sharedkernel.email.SimpleEmailMessage;
+import com.sitepark.ies.sharedkernel.email.ExternalEmailParameters;
 import com.sitepark.ies.sharedkernel.email.TemplateEmailMessage;
-import com.sitepark.ies.sharedkernel.security.AccessDeniedException;
+import com.sitepark.ies.sharedkernel.security.CodeVerificationChallenge;
+import com.sitepark.ies.sharedkernel.security.CodeVerificationFailedException;
+import com.sitepark.ies.sharedkernel.security.CodeVerificationService;
 import com.sitepark.ies.sharedkernel.security.User;
 import jakarta.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 
 public class FinishPasswordRecoveryUseCase {
+
+  public static final EmailMessageTypeIdentifier PASSWORD_RECOVERY_CONFIRMATION =
+      new EmailMessageTypeIdentifier("notification", "password-recovery-confirmation");
 
   private final CodeVerificationService codeVerificationService;
 
@@ -30,20 +32,16 @@ public class FinishPasswordRecoveryUseCase {
 
   private final EmailService emailService;
 
-  private final AccessControl accessControl;
-
   @Inject
   FinishPasswordRecoveryUseCase(
       CodeVerificationService codeVerificationService,
       UserService userService,
       SetPasswordService setPasswordService,
-      EmailService emailService,
-      AccessControl accessControl) {
+      EmailService emailService) {
     this.codeVerificationService = codeVerificationService;
     this.userService = userService;
     this.setPasswordService = setPasswordService;
     this.emailService = emailService;
-    this.accessControl = accessControl;
   }
 
   public void finishPasswordRecovery(FinishPasswordRecoveryRequest request) {
@@ -66,17 +64,12 @@ public class FinishPasswordRecoveryUseCase {
 
   private void sendEmail(FinishPasswordRecoveryRequest request, User user) {
 
-    EmailMessage message = this.updateEmailMessage(request.message(), user);
-
-    if (message instanceof SimpleEmailMessage
-        && !this.accessControl.isAllowedToSendCustomEmails()) {
-      throw new AccessDeniedException("Sending custom email messages is not allowed");
-    }
+    EmailMessage message = this.createEmailMessage(request.emailParameters(), user);
 
     Email email =
         Email.builder()
-            .from(request.from())
-            .replyTo(configurer -> configurer.set(request.replyTo()))
+            .from(request.emailParameters().from())
+            .replyTo(configurer -> configurer.set(request.emailParameters().replyTo()))
             .to(
                 configurer ->
                     configurer.set(
@@ -94,21 +87,15 @@ public class FinishPasswordRecoveryUseCase {
   }
 
   @SuppressWarnings("PMD.UseConcurrentHashMap")
-  private EmailMessage updateEmailMessage(EmailMessage message, User user) {
+  private TemplateEmailMessage createEmailMessage(ExternalEmailParameters parameters, User user) {
     Map<String, Object> data = new HashMap<>();
     data.put("user", user);
-    if (message instanceof SimpleEmailMessage(String subject, String html, String text)) {
-      String resolvedSubject = this.emailService.resolveMessage(subject, data);
-      String resolvedHtml = this.emailService.resolveMessage(html, data);
-      String resolvedText = this.emailService.resolveMessage(text, data);
-      return new SimpleEmailMessage(resolvedSubject, resolvedHtml, resolvedText);
-    } else if (message instanceof TemplateEmailMessage template) {
-      return template.toBuilder()
-          .data(configurer -> configurer.putAll(template.data()).putAll(data))
-          .build();
-    } else {
-      throw new IllegalArgumentException(
-          "Unsupported email message type " + message.getClass().getName());
-    }
+
+    return TemplateEmailMessage.builder()
+        .messageType(PASSWORD_RECOVERY_CONFIRMATION)
+        .theme(parameters.theme())
+        .lang(parameters.lang())
+        .data(configurer -> configurer.putAll(data))
+        .build();
   }
 }

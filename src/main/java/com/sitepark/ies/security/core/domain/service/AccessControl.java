@@ -62,11 +62,6 @@ public class AccessControl {
     return this.isFullAccess();
   }
 
-  public boolean isAllowedToSendCustomEmails() {
-    // return this.isFullAccess();
-    return true;
-  }
-
   private boolean isFullAccess() {
     return this.authenticationProvider.get().hasFullAccess();
   }
