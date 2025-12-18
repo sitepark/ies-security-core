@@ -129,7 +129,7 @@ public class PasswordAuthenticationUseCase {
       return AuthenticationResult.success(user, purpose);
     }
 
-    AuthenticationRequirement[] requirements = getLoginRequirements(user);
+    List<AuthenticationRequirement> requirements = getLoginRequirements(user);
 
     String authProcessId =
         this.authenticationProcessStore.store(
@@ -173,7 +173,7 @@ public class PasswordAuthenticationUseCase {
     return true;
   }
 
-  private AuthenticationRequirement[] getLoginRequirements(User user) {
+  private List<AuthenticationRequirement> getLoginRequirements(User user) {
     List<AuthenticationRequirement> requirements = new ArrayList<>();
     for (AuthFactor authFactor : user.authFactors()) {
       if (authFactor == AuthFactor.TOTP) {
@@ -184,6 +184,6 @@ public class PasswordAuthenticationUseCase {
       }
     }
 
-    return requirements.toArray(AuthenticationRequirement[]::new);
+    return requirements;
   }
 }

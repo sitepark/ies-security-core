@@ -3,6 +3,7 @@ package com.sitepark.ies.security.core.domain.entity;
 import com.sitepark.ies.sharedkernel.security.UserAuthentication;
 import java.time.Instant;
 import java.util.Objects;
+import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
 public final class Session {
@@ -13,7 +14,7 @@ public final class Session {
 
   private final UserAuthentication authentication;
 
-  private final String purpose;
+  @NotNull private final String purpose;
 
   private Session(Builder builder) {
     this.id = builder.id;
@@ -32,6 +33,10 @@ public final class Session {
 
   public UserAuthentication authentication() {
     return this.authentication;
+  }
+
+  public String purpose() {
+    return this.purpose;
   }
 
   public static Builder builder() {
