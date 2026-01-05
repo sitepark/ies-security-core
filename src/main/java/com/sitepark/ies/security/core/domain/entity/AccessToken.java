@@ -15,7 +15,9 @@ import java.util.function.Consumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-/** An access token enables authentication as a user without specifying a username and password. */
+/**
+ * An access token enables authentication as a user without specifying a username and newPassword.
+ */
 @JsonDeserialize(builder = AccessToken.Builder.class)
 @SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName", "PMD.TooManyMethods"})
 public final class AccessToken {

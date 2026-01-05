@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jparams.verifier.tostring.ToStringVerifier;
 import com.sitepark.ies.sharedkernel.security.User;
+import java.util.List;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 
@@ -37,15 +38,14 @@ class AuthenticationResultTest {
   @Test
   void testPartial() {
     AuthenticationResult result =
-        AuthenticationResult.partial(
-            "123", new AuthenticationRequirement[] {AuthenticationRequirement.TOTP_CODE_REQUIRED});
+        AuthenticationResult.partial("123", List.of(AuthenticationRequirement.TOTP_CODE_REQUIRED));
     assertEquals(AuthenticationStatus.PARTIAL, result.status(), "Unexpected status");
   }
 
   @Test
   void testSerializeFailure() throws JsonProcessingException {
     ObjectMapper mapper = new ObjectMapper();
-    mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+    mapper.setDefaultPropertyInclusion(JsonInclude.Include.NON_EMPTY);
     AuthenticationResult result = AuthenticationResult.failure();
     String json = mapper.writeValueAsString(result);
     String expected =
@@ -59,7 +59,7 @@ class AuthenticationResultTest {
   @Test
   void testSerializeSuccess() throws JsonProcessingException {
     ObjectMapper mapper = new ObjectMapper();
-    mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+    mapper.setDefaultPropertyInclusion(JsonInclude.Include.NON_EMPTY);
     User user = User.builder().id("1").username("test").lastName("test").build();
     AuthenticationResult result = AuthenticationResult.success(user, "purpose");
     String json = mapper.writeValueAsString(result);
@@ -74,10 +74,9 @@ class AuthenticationResultTest {
   @Test
   void testSerializePartial() throws JsonProcessingException {
     ObjectMapper mapper = new ObjectMapper();
-    mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+    mapper.setDefaultPropertyInclusion(JsonInclude.Include.NON_EMPTY);
     AuthenticationResult result =
-        AuthenticationResult.partial(
-            "123", new AuthenticationRequirement[] {AuthenticationRequirement.TOTP_CODE_REQUIRED});
+        AuthenticationResult.partial("123", List.of(AuthenticationRequirement.TOTP_CODE_REQUIRED));
     String json = mapper.writeValueAsString(result);
     String expected =
         """

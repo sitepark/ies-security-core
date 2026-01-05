@@ -8,7 +8,7 @@ import com.sitepark.ies.security.core.port.TotpAuthenticationProcessStore;
 import com.sitepark.ies.security.core.port.TotpProvider;
 import com.sitepark.ies.security.core.port.VaultProvider;
 import jakarta.inject.Inject;
-import java.util.Arrays;
+import java.util.List;
 
 public class ValidateTotpCodeUseCase {
 
@@ -37,7 +37,7 @@ public class ValidateTotpCodeUseCase {
                         "Authentication process not found: " + authProcessId));
 
     boolean codeRequired =
-        Arrays.stream(authState.requirements())
+        authState.requirements().stream()
             .anyMatch(requirement -> requirement == AuthenticationRequirement.TOTP_CODE_REQUIRED);
 
     if (!codeRequired) {
@@ -55,12 +55,12 @@ public class ValidateTotpCodeUseCase {
       return AuthenticationResult.failure();
     }
 
-    AuthenticationRequirement[] remainingRequirements =
-        Arrays.stream(authState.requirements())
+    List<AuthenticationRequirement> remainingRequirements =
+        authState.requirements().stream()
             .filter(requirement -> requirement != AuthenticationRequirement.TOTP_CODE_REQUIRED)
-            .toArray(AuthenticationRequirement[]::new);
+            .toList();
 
-    if (remainingRequirements.length == 0) {
+    if (remainingRequirements.isEmpty()) {
       return AuthenticationResult.success(authState.user(), authState.purpose());
     }
 
