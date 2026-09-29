@@ -3,10 +3,8 @@ package com.sitepark.ies.security.core.usecase.token;
 import com.sitepark.ies.sharedkernel.security.Permission;
 import java.time.Instant;
 import java.util.List;
-import javax.annotation.concurrent.Immutable;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
-@Immutable
 public record CreateServiceTokenRequest(
     String name, List<Permission> permissions, @Nullable Instant expiresAt) {
   public CreateServiceTokenRequest {
@@ -16,6 +14,7 @@ public record CreateServiceTokenRequest(
     permissions = List.copyOf(permissions);
   }
 
+  @Override
   public List<Permission> permissions() {
     return List.copyOf(permissions);
   }

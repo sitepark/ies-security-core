@@ -4,22 +4,23 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sitepark.ies.sharedkernel.security.User;
 import java.util.List;
 import java.util.Objects;
+import org.jspecify.annotations.Nullable;
 
 @SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName", "PMD.TooManyMethods"})
 public final class AuthenticationResult {
 
   private final AuthenticationStatus status;
-  private final User user;
-  private final String authProcessId; // für PARTIAL-Logins
+  @Nullable private final User user;
+  @Nullable private final String authProcessId; // für PARTIAL-Logins
   private final List<AuthenticationRequirement> requirements;
-  private final String purpose;
+  @Nullable private final String purpose;
 
   private AuthenticationResult(
       AuthenticationStatus status,
-      User user,
-      String authProcessId,
-      List<AuthenticationRequirement> requirements,
-      String purpose) {
+      @Nullable User user,
+      @Nullable String authProcessId,
+      @Nullable List<AuthenticationRequirement> requirements,
+      @Nullable String purpose) {
     this.status = status;
     this.user = user;
     this.authProcessId = authProcessId;
@@ -82,17 +83,17 @@ public final class AuthenticationResult {
   }
 
   @JsonProperty
-  public User user() {
+  public @Nullable User user() {
     return user;
   }
 
   @JsonProperty
-  public String authProcessId() {
+  public @Nullable String authProcessId() {
     return authProcessId;
   }
 
   @JsonProperty
-  public String purpose() {
+  public @Nullable String purpose() {
     return purpose;
   }
 

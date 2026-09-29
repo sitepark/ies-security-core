@@ -29,7 +29,8 @@ public class CreateServiceTokenUserCase {
       AccessTokenRepository repository,
       AccessControl accessControl,
       TokenService tokenService,
-      UserService userService,
+      @SuppressWarnings("UnusedVariable") // kept for the injection signature
+          UserService userService,
       Clock clock) {
     this.repository = repository;
     this.accessControl = accessControl;

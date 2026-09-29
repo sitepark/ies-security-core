@@ -12,8 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * An access token enables authentication as a user without specifying a username and newPassword.
@@ -22,11 +21,11 @@ import org.jetbrains.annotations.Nullable;
 @SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName", "PMD.TooManyMethods"})
 public final class AccessToken {
 
-  private final String id;
+  @Nullable private final String id;
 
-  @NotNull private final String userId;
+  @Nullable private final String userId;
 
-  @NotNull private final String name;
+  private final String name;
 
   @Nullable private final Instant createdAt;
 
@@ -34,7 +33,7 @@ public final class AccessToken {
 
   @Nullable private final Instant lastUsedAt;
 
-  @NotNull private final List<Permission> permissions;
+  private final List<Permission> permissions;
 
   private final TokenType tokenType;
 
@@ -45,26 +44,23 @@ public final class AccessToken {
   private AccessToken(Builder builder) {
     this.id = builder.id;
     this.userId = builder.userId;
-    this.name = builder.name;
+    this.name = Objects.requireNonNull(builder.name, "name is null");
     this.createdAt = builder.createdAt;
     this.expiresAt = builder.expiresAt;
     this.lastUsedAt = builder.lastUsedAt;
     this.permissions = List.copyOf(builder.permissions);
-    this.tokenType = builder.tokenType;
+    this.tokenType = Objects.requireNonNull(builder.tokenType, "tokenType is null");
     this.active = builder.active;
     this.revoked = builder.revoked;
-
-    Objects.requireNonNull(this.name, "name is null");
-    Objects.requireNonNull(this.tokenType, "tokenType is null");
   }
 
   @JsonProperty
-  public String id() {
+  public @Nullable String id() {
     return this.id;
   }
 
   @JsonProperty
-  public String userId() {
+  public @Nullable String userId() {
     return this.userId;
   }
 
@@ -74,17 +70,17 @@ public final class AccessToken {
   }
 
   @JsonProperty
-  public Instant createdAt() {
+  public @Nullable Instant createdAt() {
     return this.createdAt;
   }
 
   @JsonProperty
-  public Instant expiresAt() {
+  public @Nullable Instant expiresAt() {
     return this.expiresAt;
   }
 
   @JsonProperty
-  public Instant lastUsedAt() {
+  public @Nullable Instant lastUsedAt() {
     return this.lastUsedAt;
   }
 
@@ -146,8 +142,8 @@ public final class AccessToken {
         && Objects.equals(this.lastUsedAt, that.lastUsedAt)
         && Objects.equals(this.permissions, that.permissions)
         && Objects.equals(this.tokenType, that.tokenType)
-        && Objects.equals(this.active, that.active)
-        && Objects.equals(this.revoked, that.revoked);
+        && this.active == that.active
+        && this.revoked == that.revoked;
   }
 
   @Override
@@ -183,21 +179,21 @@ public final class AccessToken {
   @JsonPOJOBuilder(withPrefix = "")
   public static final class Builder {
 
-    private String id;
+    @Nullable private String id;
 
-    private String userId;
+    @Nullable private String userId;
 
-    private String name;
+    @Nullable private String name;
 
-    private Instant createdAt;
+    @Nullable private Instant createdAt;
 
-    private Instant expiresAt;
+    @Nullable private Instant expiresAt;
 
-    private Instant lastUsedAt;
+    @Nullable private Instant lastUsedAt;
 
     private final List<Permission> permissions = new ArrayList<>();
 
-    private TokenType tokenType;
+    @Nullable private TokenType tokenType;
 
     private boolean active = true;
 
@@ -237,17 +233,17 @@ public final class AccessToken {
       return this;
     }
 
-    public Builder createdAt(Instant createdAt) {
+    public Builder createdAt(@Nullable Instant createdAt) {
       this.createdAt = createdAt;
       return this;
     }
 
-    public Builder expiresAt(Instant expiresAt) {
+    public Builder expiresAt(@Nullable Instant expiresAt) {
       this.expiresAt = expiresAt;
       return this;
     }
 
-    public Builder lastUsedAt(Instant lastUsedAt) {
+    public Builder lastUsedAt(@Nullable Instant lastUsedAt) {
       this.lastUsedAt = lastUsedAt;
       return this;
     }

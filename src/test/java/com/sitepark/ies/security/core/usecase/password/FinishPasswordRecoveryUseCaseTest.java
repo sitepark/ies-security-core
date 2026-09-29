@@ -36,7 +36,7 @@ class FinishPasswordRecoveryUseCaseTest {
 
   private static final String LANG = "en";
 
-  public static final ExternalEmailParameters EMAIL_PARAMETERS =
+  private static final ExternalEmailParameters EMAIL_PARAMETERS =
       new ExternalEmailParameters(mock(EmailAddress.class), List.of(), THEME, LANG);
 
   private CodeVerificationService codeVerificationService;

@@ -18,7 +18,9 @@ import jakarta.inject.Inject;
 import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import org.jspecify.annotations.Nullable;
 
 public class TokenAuthenticationUseCase {
 
@@ -68,13 +70,16 @@ public class TokenAuthenticationUseCase {
     }
     this.checkExpirationDate(accessToken.expiresAt());
 
-    this.accessTokenRepository.touch(accessToken.id());
+    this.accessTokenRepository.touch(
+        Objects.requireNonNull(accessToken.id(), "access token id is null"));
 
     return accessToken;
   }
 
   private UserAuthentication createUserBasedAuthentication(AccessToken accessToken) {
-    Optional<User> user = this.userService.findById(accessToken.userId());
+    Optional<User> user =
+        this.userService.findById(
+            Objects.requireNonNull(accessToken.userId(), "access token userId is null"));
     if (user.isEmpty()) {
       throw new InvalidAccessTokenException("User " + accessToken.userId() + " not found");
     }
@@ -91,7 +96,7 @@ public class TokenAuthenticationUseCase {
         .build();
   }
 
-  public void checkExpirationDate(Instant expiredAt) {
+  public void checkExpirationDate(@Nullable Instant expiredAt) {
 
     if (expiredAt == null) {
       return;

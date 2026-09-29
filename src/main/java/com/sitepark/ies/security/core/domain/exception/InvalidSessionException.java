@@ -2,6 +2,7 @@ package com.sitepark.ies.security.core.domain.exception;
 
 import com.sitepark.ies.sharedkernel.domain.DomainException;
 import java.io.Serial;
+import org.jspecify.annotations.Nullable;
 
 public class InvalidSessionException extends DomainException {
 
@@ -13,7 +14,9 @@ public class InvalidSessionException extends DomainException {
     this(session, null);
   }
 
-  public InvalidSessionException(String session, Throwable t) {
+  // DomainException of ies-shared-kernel 1.0.0 does not declare the cause as @Nullable
+  @SuppressWarnings("NullAway")
+  public InvalidSessionException(String session, @Nullable Throwable t) {
     super("Invalid session " + session, t);
     this.session = session;
   }

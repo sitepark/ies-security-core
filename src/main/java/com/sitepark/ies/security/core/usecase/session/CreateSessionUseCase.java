@@ -8,6 +8,7 @@ import com.sitepark.ies.sharedkernel.security.User;
 import com.sitepark.ies.sharedkernel.security.UserAuthentication;
 import jakarta.inject.Inject;
 import java.util.List;
+import java.util.Objects;
 
 public class CreateSessionUseCase {
 
@@ -33,6 +34,6 @@ public class CreateSessionUseCase {
             .build();
 
     Session session = this.sessionRegistry.create(authentication, purpose);
-    return session.id();
+    return Objects.requireNonNull(session.id(), "session id is null");
   }
 }
