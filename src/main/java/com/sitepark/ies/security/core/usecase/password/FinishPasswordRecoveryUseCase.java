@@ -18,6 +18,7 @@ import com.sitepark.ies.sharedkernel.security.User;
 import jakarta.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class FinishPasswordRecoveryUseCase {
 
@@ -74,7 +75,8 @@ public class FinishPasswordRecoveryUseCase {
                 configurer ->
                     configurer.set(
                         EmailAddress.builder()
-                            .address(user.email())
+                            .address(
+                                Objects.requireNonNull(user.email(), "user has no email address"))
                             .name(user.toDisplayName())
                             .build()))
             .message(message)
