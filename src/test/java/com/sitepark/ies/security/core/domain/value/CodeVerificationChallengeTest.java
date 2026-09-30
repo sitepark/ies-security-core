@@ -1,6 +1,6 @@
 package com.sitepark.ies.security.core.domain.value;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
 import com.sitepark.ies.sharedkernel.security.CodeVerificationChallenge;

@@ -17,6 +17,7 @@ import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 public final class StartPasswordRecoveryUseCase {
@@ -89,7 +90,10 @@ public final class StartPasswordRecoveryUseCase {
                 configurer ->
                     configurer.set(
                         EmailAddress.builder()
-                            .address(user.email())
+                            .address(
+                                Objects.requireNonNull(
+                                    user.email(),
+                                    "email is checked before the challenge is started"))
                             .name(user.toDisplayName())
                             .build()))
             .message(message)

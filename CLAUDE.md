@@ -46,9 +46,6 @@ mvn spotless:apply
 # Check code formatting
 mvn spotless:check
 
-# Run SpotBugs analysis
-mvn spotbugs:check
-
 # Run PMD analysis
 mvn pmd:check
 
@@ -237,7 +234,7 @@ void testMethodName() {
 
 ## Key Dependencies
 
-- **Java 21**: LTS version with modern language features
+- **Java 25**: LTS version with modern language features
 - **Jackson**: JSON serialization (for value objects)
 - **Log4j2**: Logging framework
 - **Jakarta Inject**: Dependency injection API
@@ -247,10 +244,10 @@ void testMethodName() {
 
 The build enforces:
 - **Spotless**: Google Java Style formatting
-- **SpotBugs**: Static bug detection (max effort, low threshold)
+- **Error Prone and NullAway (JSpecify mode)**: run during compilation, `-Werror` turns every warning into an error. Code is `@NullMarked`; nullable points use `org.jspecify.annotations.Nullable`
 - **PMD**: Code quality rules (custom ruleset in `pmd-ruleset.xml`)
 - **JaCoCo**: Code coverage reporting (configured but threshold at 0%)
-- **Maven Enforcer**: Requires Maven 3.8+ and Java 21
+- **Maven Enforcer**: Requires Maven 3.8+ and Java 25
 
 All quality checks run during `mvn verify` phase.
 

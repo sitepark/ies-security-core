@@ -3,12 +3,13 @@ package com.sitepark.ies.security.core.domain.exception;
 import com.sitepark.ies.sharedkernel.domain.DomainException;
 import com.sitepark.ies.sharedkernel.security.Authentication;
 import java.io.Serial;
+import org.jspecify.annotations.Nullable;
 
 public class AuthenticationFailedException extends DomainException {
 
   @Serial private static final long serialVersionUID = 1L;
 
-  private final transient Authentication authentication;
+  @Nullable private final transient Authentication authentication;
 
   public AuthenticationFailedException() {
     super();
@@ -29,7 +30,7 @@ public class AuthenticationFailedException extends DomainException {
     this.authentication = authentication;
   }
 
-  public AuthenticationFailedException(Authentication authentication, Throwable t) {
+  public AuthenticationFailedException(Authentication authentication, @Nullable Throwable t) {
     super("Authentication failed: " + authentication.name(), t);
     this.authentication = authentication;
   }
@@ -39,7 +40,7 @@ public class AuthenticationFailedException extends DomainException {
     this.authentication = authentication;
   }
 
-  public Authentication getAuthentication() {
+  public @Nullable Authentication getAuthentication() {
     return this.authentication;
   }
 }

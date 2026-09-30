@@ -1,6 +1,7 @@
 package com.sitepark.ies.security.core.domain.value;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import com.jparams.verifier.tostring.ToStringVerifier;
 import java.util.List;

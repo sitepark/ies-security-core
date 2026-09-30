@@ -13,7 +13,6 @@ import com.sitepark.ies.sharedkernel.security.InternalIdentity;
 import com.sitepark.ies.sharedkernel.security.LdapIdentity;
 import com.sitepark.ies.sharedkernel.security.PasswordEncoder;
 import com.sitepark.ies.sharedkernel.security.User;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import jakarta.inject.Inject;
 import java.time.Clock;
 import java.time.Instant;
@@ -40,7 +39,6 @@ public class PasswordAuthenticationUseCase {
   private static final Logger LOGGER = LogManager.getLogger();
 
   @Inject
-  @SuppressFBWarnings("EI_EXPOSE_REP2")
   public PasswordAuthenticationUseCase(
       Clock clock,
       UserService userService,

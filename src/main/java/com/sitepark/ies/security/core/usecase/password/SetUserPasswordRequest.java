@@ -3,22 +3,21 @@ package com.sitepark.ies.security.core.usecase.password;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import java.util.Objects;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 @JsonDeserialize(builder = SetUserPasswordRequest.Builder.class)
 @SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName"})
 public final class SetUserPasswordRequest {
 
-  @NotNull private final String userId;
+  private final String userId;
 
-  @NotNull private final String newPassword;
+  private final String newPassword;
 
   @Nullable private final String auditParentId;
 
   private SetUserPasswordRequest(Builder builder) {
-    this.userId = builder.userId;
-    this.newPassword = builder.newPassword;
+    this.userId = Objects.requireNonNull(builder.userId, "userId must not be null");
+    this.newPassword = Objects.requireNonNull(builder.newPassword, "newPassword must not be null");
     this.auditParentId = builder.auditParentId;
   }
 
@@ -71,11 +70,11 @@ public final class SetUserPasswordRequest {
   @JsonPOJOBuilder(withPrefix = "")
   public static final class Builder {
 
-    private String userId;
+    @Nullable private String userId;
 
-    private String newPassword;
+    @Nullable private String newPassword;
 
-    private String auditParentId;
+    @Nullable private String auditParentId;
 
     private Builder() {}
 
@@ -95,14 +94,12 @@ public final class SetUserPasswordRequest {
       return this;
     }
 
-    public Builder auditParentId(String auditParentId) {
+    public Builder auditParentId(@Nullable String auditParentId) {
       this.auditParentId = auditParentId;
       return this;
     }
 
     public SetUserPasswordRequest build() {
-      Objects.requireNonNull(this.userId, "userId must not be null");
-      Objects.requireNonNull(this.newPassword, "newPassword must not be null");
       return new SetUserPasswordRequest(this);
     }
   }

@@ -1,3 +1,6 @@
+import org.jspecify.annotations.NullMarked;
+
+@NullMarked
 module com.sitepark.ies.security.core {
   exports com.sitepark.ies.security.core.domain.entity;
   exports com.sitepark.ies.security.core.domain.value;
@@ -11,6 +14,7 @@ module com.sitepark.ies.security.core {
   exports com.sitepark.ies.security.core.usecase.oidc;
   exports com.sitepark.ies.security.core.usecase.password;
 
+  requires static org.jspecify;
   requires org.apache.logging.log4j;
   requires jakarta.inject;
   requires com.fasterxml.jackson.annotation;
@@ -18,9 +22,6 @@ module com.sitepark.ies.security.core {
   requires com.fasterxml.jackson.datatype.jdk8;
   requires com.fasterxml.jackson.datatype.jsr310;
   requires com.sitepark.ies.sharedkernel;
-  requires static com.github.spotbugs.annotations;
-  requires static org.jetbrains.annotations;
-  requires jsr305;
 
   opens com.sitepark.ies.security.core.port;
   opens com.sitepark.ies.security.core.domain.entity;

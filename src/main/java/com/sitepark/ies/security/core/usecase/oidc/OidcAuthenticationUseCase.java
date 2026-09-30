@@ -40,6 +40,9 @@ public class OidcAuthenticationUseCase {
             .email(oidcUser.email())
             .build();
 
+    // AuthenticationContext.providerId is not @Nullable in ies-shared-kernel, but OIDC logins
+    // have no provider id
+    @SuppressWarnings("NullAway")
     AuthenticationContext context =
         new AuthenticationContext(providerType, null, AuthMethod.OAUTH2, oidcUser.id());
 

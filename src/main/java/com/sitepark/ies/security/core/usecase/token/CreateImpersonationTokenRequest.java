@@ -1,7 +1,7 @@
 package com.sitepark.ies.security.core.usecase.token;
 
 import java.time.Instant;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public record CreateImpersonationTokenRequest(
     String userId, String name, @Nullable Instant expiresAt) {

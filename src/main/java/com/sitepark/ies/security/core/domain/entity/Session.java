@@ -3,18 +3,18 @@ package com.sitepark.ies.security.core.domain.entity;
 import com.sitepark.ies.sharedkernel.security.UserAuthentication;
 import java.time.Instant;
 import java.util.Objects;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
 @SuppressWarnings("PMD.AvoidFieldNameMatchingMethodName")
 public final class Session {
 
-  private final String id;
+  @Nullable private final String id;
 
-  private final Instant createdAt;
+  @Nullable private final Instant createdAt;
 
-  private final UserAuthentication authentication;
+  @Nullable private final UserAuthentication authentication;
 
-  @NotNull private final String purpose;
+  private final String purpose;
 
   private Session(Builder builder) {
     this.id = builder.id;
@@ -23,15 +23,15 @@ public final class Session {
     this.purpose = Objects.requireNonNull(builder.purpose, "purpose cannot be null");
   }
 
-  public String id() {
+  public @Nullable String id() {
     return this.id;
   }
 
-  public Instant createdAt() {
+  public @Nullable Instant createdAt() {
     return this.createdAt;
   }
 
-  public UserAuthentication authentication() {
+  public @Nullable UserAuthentication authentication() {
     return this.authentication;
   }
 
@@ -81,13 +81,13 @@ public final class Session {
 
   public static final class Builder {
 
-    private String id;
+    @Nullable private String id;
 
-    private Instant createdAt;
+    @Nullable private Instant createdAt;
 
-    private UserAuthentication authentication;
+    @Nullable private UserAuthentication authentication;
 
-    private String purpose;
+    @Nullable private String purpose;
 
     private Builder() {}
 
