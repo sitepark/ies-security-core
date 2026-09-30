@@ -14,8 +14,6 @@ public class InvalidSessionException extends DomainException {
     this(session, null);
   }
 
-  // DomainException of ies-shared-kernel 1.0.0 does not declare the cause as @Nullable
-  @SuppressWarnings("NullAway")
   public InvalidSessionException(String session, @Nullable Throwable t) {
     super("Invalid session " + session, t);
     this.session = session;

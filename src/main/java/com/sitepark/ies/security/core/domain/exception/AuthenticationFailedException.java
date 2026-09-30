@@ -30,8 +30,6 @@ public class AuthenticationFailedException extends DomainException {
     this.authentication = authentication;
   }
 
-  // DomainException of ies-shared-kernel 1.0.0 does not declare the cause as @Nullable
-  @SuppressWarnings("NullAway")
   public AuthenticationFailedException(Authentication authentication, @Nullable Throwable t) {
     super("Authentication failed: " + authentication.name(), t);
     this.authentication = authentication;
