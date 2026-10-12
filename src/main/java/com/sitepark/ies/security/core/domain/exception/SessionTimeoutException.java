@@ -10,7 +10,7 @@ public class SessionTimeoutException extends DomainException {
   private final long session;
 
   public SessionTimeoutException(long session) {
-    super("Session timeout " + session);
+    super("Session timeout");
     this.session = session;
   }
 

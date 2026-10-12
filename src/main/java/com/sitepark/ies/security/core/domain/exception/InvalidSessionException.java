@@ -15,7 +15,7 @@ public class InvalidSessionException extends DomainException {
   }
 
   public InvalidSessionException(String session, @Nullable Throwable t) {
-    super("Invalid session " + session, t);
+    super("Invalid session", t);
     this.session = session;
   }
 
