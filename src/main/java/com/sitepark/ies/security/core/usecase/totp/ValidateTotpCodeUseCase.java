@@ -61,6 +61,7 @@ public class ValidateTotpCodeUseCase {
             .toList();
 
     if (remainingRequirements.isEmpty()) {
+      this.authenticationProcessStore.remove(authProcessId);
       return AuthenticationResult.success(authState.user(), authState.purpose());
     }
 

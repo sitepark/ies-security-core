@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.sitepark.ies.security.core.domain.value.AuthenticationRequirement;
@@ -63,6 +65,7 @@ class ValidateTotpCodeUseCaseTest {
   }
 
   @Test
+  @SuppressWarnings("PMD.UnitTestContainsTooManyAsserts")
   void testInvalidSecret() {
 
     User user = User.builder().id("123").username("peterpan").lastName("Pan").build();
@@ -81,9 +84,11 @@ class ValidateTotpCodeUseCaseTest {
         AuthenticationResult.failure(),
         this.useCase.validateTotpCode("testProcessId", 123456),
         "Expected failure due to invalid TOTP code");
+    verify(this.authenticationProcessStore, never()).remove(any());
   }
 
   @Test
+  @SuppressWarnings("PMD.UnitTestContainsTooManyAsserts")
   void testSuccess() {
     User user = User.builder().id("123").username("peterpan").lastName("Pan").build();
     PartialAuthenticationState authState =
@@ -101,9 +106,11 @@ class ValidateTotpCodeUseCaseTest {
         AuthenticationResult.success(user, "purpose"),
         this.useCase.validateTotpCode("testProcessId", 123456),
         "Expected successful TOTP code validation");
+    verify(this.authenticationProcessStore).remove("testProcessId");
   }
 
   @Test
+  @SuppressWarnings("PMD.UnitTestContainsTooManyAsserts")
   void testPartial() {
     User user = User.builder().id("123").username("peterpan").lastName("Pan").build();
     PartialAuthenticationState authState =
@@ -128,5 +135,6 @@ class ValidateTotpCodeUseCaseTest {
             "testProcessId", List.of(AuthenticationRequirement.PASSKEY_CHALLENGE_REQUIRED)),
         this.useCase.validateTotpCode("testProcessId", 123456),
         "Expected successful TOTP code validation");
+    verify(this.authenticationProcessStore, never()).remove(any());
   }
 }
