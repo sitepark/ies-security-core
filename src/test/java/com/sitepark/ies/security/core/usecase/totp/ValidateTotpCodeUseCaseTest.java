@@ -9,6 +9,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.sitepark.ies.security.core.domain.exception.AuthenticationProcessNotFoundException;
+import com.sitepark.ies.security.core.domain.exception.TotpNotRequiredException;
 import com.sitepark.ies.security.core.domain.value.AuthenticationRequirement;
 import com.sitepark.ies.security.core.domain.value.AuthenticationResult;
 import com.sitepark.ies.security.core.domain.value.PartialAuthenticationState;
@@ -43,10 +45,11 @@ class ValidateTotpCodeUseCaseTest {
   void testInvalidProcessId() {
     when(this.authenticationProcessStore.retrieve(any())).thenReturn(Optional.empty());
     assertThrows(
-        IllegalArgumentException.class,
+        AuthenticationProcessNotFoundException.class,
         () -> {
           this.useCase.validateTotpCode("testProcessId", 123456);
-        });
+        },
+        "unknown process must be reported");
   }
 
   @Test
@@ -58,10 +61,11 @@ class ValidateTotpCodeUseCaseTest {
     when(this.authenticationProcessStore.retrieve(any())).thenReturn(Optional.of(authState));
 
     assertThrows(
-        IllegalArgumentException.class,
+        TotpNotRequiredException.class,
         () -> {
           this.useCase.validateTotpCode("testProcessId", 123456);
-        });
+        },
+        "missing TOTP requirement must be reported");
   }
 
   @Test

@@ -45,13 +45,13 @@ public class PasswordAuthenticationUseCase {
       LdapAuthenticator ldapAuthenticator,
       PasswordEncoder passwordEncoder,
       AuthenticationAttemptLimiter loginAttemptLimiter,
-      TotpAuthenticationProcessStore authenticationSessionStore) {
+      TotpAuthenticationProcessStore authenticationProcessStore) {
     this.clock = clock;
     this.userService = userService;
     this.ldapAuthenticator = ldapAuthenticator;
     this.passwordEncoder = passwordEncoder;
     this.loginAttemptLimiter = loginAttemptLimiter;
-    this.authenticationProcessStore = authenticationSessionStore;
+    this.authenticationProcessStore = authenticationProcessStore;
   }
 
   public AuthenticationResult passwordAuthentication(

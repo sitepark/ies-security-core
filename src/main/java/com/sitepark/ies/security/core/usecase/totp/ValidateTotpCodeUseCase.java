@@ -1,5 +1,7 @@
 package com.sitepark.ies.security.core.usecase.totp;
 
+import com.sitepark.ies.security.core.domain.exception.AuthenticationProcessNotFoundException;
+import com.sitepark.ies.security.core.domain.exception.TotpNotRequiredException;
 import com.sitepark.ies.security.core.domain.value.AuthenticationRequirement;
 import com.sitepark.ies.security.core.domain.value.AuthenticationResult;
 import com.sitepark.ies.security.core.domain.value.PartialAuthenticationState;
@@ -31,18 +33,14 @@ public class ValidateTotpCodeUseCase {
     PartialAuthenticationState authState =
         this.authenticationProcessStore
             .retrieve(authProcessId)
-            .orElseThrow(
-                () ->
-                    new IllegalArgumentException(
-                        "Authentication process not found: " + authProcessId));
+            .orElseThrow(AuthenticationProcessNotFoundException::new);
 
     boolean codeRequired =
         authState.requirements().stream()
             .anyMatch(requirement -> requirement == AuthenticationRequirement.TOTP_CODE_REQUIRED);
 
     if (!codeRequired) {
-      throw new IllegalArgumentException(
-          "TOTP code validation is not required for this authentication process: " + authProcessId);
+      throw new TotpNotRequiredException();
     }
 
     String secret =
