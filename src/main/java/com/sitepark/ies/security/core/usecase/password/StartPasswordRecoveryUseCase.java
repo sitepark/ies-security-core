@@ -43,34 +43,16 @@ public final class StartPasswordRecoveryUseCase {
 
   public StartPasswordRecoveryResult startPasswordRecovery(StartPasswordRecoveryRequest request) {
 
-    Optional<User> optUser = this.userService.findByUsername(request.username());
-
-    if (optUser.isEmpty()) {
-      return this.createFakeChallenge();
-    }
-
-    User user = optUser.get();
-    if (user.email() == null) {
-      return this.createFakeChallenge();
-    }
-
-    return this.startChallenge(user, request);
-  }
-
-  private StartPasswordRecoveryResult createFakeChallenge() {
-    CodeVerificationChallenge challenge = this.codeVerificationService.createFakeChallenge();
-    return new StartPasswordRecoveryResult(
-        challenge.challengeId(), challenge.createdAt(), challenge.expiresAt());
-  }
-
-  private StartPasswordRecoveryResult startChallenge(
-      User user, StartPasswordRecoveryRequest request) {
-
+    // A challenge is started for every username, also for unknown users and users without an
+    // email address. Its code is only sent to existing users, but all requests are answered the
+    // same way and repeated requests for the same username are limited the same way.
     PasswordRecoverPayload payload = new PasswordRecoverPayload(request.username());
-
     CodeVerificationChallenge challenge = this.codeVerificationService.startChallenge(payload);
 
-    this.sendEmail(request, user, challenge);
+    Optional<User> optUser = this.userService.findByUsername(request.username());
+    if (challenge.sendCode() && optUser.isPresent() && optUser.get().email() != null) {
+      this.sendEmail(request, optUser.get(), challenge);
+    }
 
     return new StartPasswordRecoveryResult(
         challenge.challengeId(), challenge.createdAt(), challenge.expiresAt());

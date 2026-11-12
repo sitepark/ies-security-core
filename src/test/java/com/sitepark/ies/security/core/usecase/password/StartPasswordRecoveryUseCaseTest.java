@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -55,7 +56,7 @@ class StartPasswordRecoveryUseCaseTest {
   }
 
   @Test
-  void testUserNotFoundReturnsFakeChallenge() {
+  void testUserNotFoundReturnsChallengeWithoutEmail() {
 
     when(this.userService.findByUsername("unknown")).thenReturn(Optional.empty());
 
@@ -67,7 +68,8 @@ class StartPasswordRecoveryUseCaseTest {
             Instant.parse("2025-01-01T10:00:00Z"),
             Instant.parse("2025-01-01T10:15:00Z"),
             0);
-    when(this.codeVerificationService.createFakeChallenge()).thenReturn(fakeChallenge);
+    when(this.codeVerificationService.startChallenge(any(PasswordRecoverPayload.class)))
+        .thenReturn(fakeChallenge);
 
     StartPasswordRecoveryRequest request =
         new StartPasswordRecoveryRequest("unknown", EMAIL_PARAMETERS);
@@ -79,7 +81,7 @@ class StartPasswordRecoveryUseCaseTest {
   }
 
   @Test
-  void testUserWithoutEmailReturnsFakeChallenge() {
+  void testUserWithoutEmailReturnsChallengeWithoutEmail() {
 
     User user = mock(User.class);
     when(user.email()).thenReturn(null);
@@ -93,7 +95,8 @@ class StartPasswordRecoveryUseCaseTest {
             Instant.parse("2025-01-01T10:00:00Z"),
             Instant.parse("2025-01-01T10:15:00Z"),
             0);
-    when(this.codeVerificationService.createFakeChallenge()).thenReturn(fakeChallenge);
+    when(this.codeVerificationService.startChallenge(any(PasswordRecoverPayload.class)))
+        .thenReturn(fakeChallenge);
 
     StartPasswordRecoveryRequest request =
         new StartPasswordRecoveryRequest("userWithoutEmail", EMAIL_PARAMETERS);
@@ -176,6 +179,33 @@ class StartPasswordRecoveryUseCaseTest {
   }
 
   @Test
+  void testCodeAlreadySentSendsNoEmail() throws EmailSendException {
+
+    User user = mock(User.class);
+    when(user.email()).thenReturn("user@example.com");
+    when(this.userService.findByUsername("validUser")).thenReturn(Optional.of(user));
+
+    CodeVerificationChallenge challenge =
+        new CodeVerificationChallenge(
+            "challenge-790",
+            789012,
+            new PasswordRecoverPayload("validUser"),
+            Instant.parse("2025-01-01T10:00:00Z"),
+            Instant.parse("2025-01-01T10:15:00Z"),
+            0,
+            false);
+    when(this.codeVerificationService.startChallenge(any(PasswordRecoverPayload.class)))
+        .thenReturn(challenge);
+
+    StartPasswordRecoveryRequest request =
+        new StartPasswordRecoveryRequest("validUser", EMAIL_PARAMETERS);
+
+    this.useCase.startPasswordRecovery(request);
+
+    verify(this.emailService, never()).send(any());
+  }
+
+  @Test
   void testEmailSendFailureThrowsException() throws EmailSendException {
 
     User user = mock(User.class);
@@ -227,7 +257,8 @@ class StartPasswordRecoveryUseCaseTest {
             Instant.parse("2025-01-01T10:00:00Z"),
             Instant.parse("2025-01-01T10:15:00Z"),
             0);
-    when(this.codeVerificationService.createFakeChallenge()).thenReturn(fakeChallenge);
+    when(this.codeVerificationService.startChallenge(any(PasswordRecoverPayload.class)))
+        .thenReturn(fakeChallenge);
 
     StartPasswordRecoveryRequest request =
         new StartPasswordRecoveryRequest("testuser", EMAIL_PARAMETERS);
@@ -284,13 +315,38 @@ class StartPasswordRecoveryUseCaseTest {
             Instant.parse("2025-01-01T10:00:00Z"),
             Instant.parse("2025-01-01T10:15:00Z"),
             0);
-    when(this.codeVerificationService.createFakeChallenge()).thenReturn(fakeChallenge);
+    when(this.codeVerificationService.startChallenge(any(PasswordRecoverPayload.class)))
+        .thenReturn(fakeChallenge);
 
     StartPasswordRecoveryRequest request =
         new StartPasswordRecoveryRequest("unknown", EMAIL_PARAMETERS);
 
     this.useCase.startPasswordRecovery(request);
 
-    verify(this.codeVerificationService).createFakeChallenge();
+    verify(this.codeVerificationService).startChallenge(new PasswordRecoverPayload("unknown"));
+  }
+
+  @Test
+  void testInvalidUserSendsNoEmail() throws EmailSendException {
+
+    when(this.userService.findByUsername(anyString())).thenReturn(Optional.empty());
+
+    CodeVerificationChallenge challenge =
+        new CodeVerificationChallenge(
+            "challenge-124",
+            123456,
+            new PasswordRecoverPayload("unknown"),
+            Instant.parse("2025-01-01T10:00:00Z"),
+            Instant.parse("2025-01-01T10:15:00Z"),
+            0);
+    when(this.codeVerificationService.startChallenge(any(PasswordRecoverPayload.class)))
+        .thenReturn(challenge);
+
+    StartPasswordRecoveryRequest request =
+        new StartPasswordRecoveryRequest("unknown", EMAIL_PARAMETERS);
+
+    this.useCase.startPasswordRecovery(request);
+
+    verify(this.emailService, never()).send(any());
   }
 }
