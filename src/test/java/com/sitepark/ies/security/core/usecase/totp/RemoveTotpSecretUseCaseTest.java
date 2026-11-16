@@ -39,6 +39,7 @@ class RemoveTotpSecretUseCaseTest {
   }
 
   @Test
+  @SuppressWarnings("PMD.UnitTestContainsTooManyAsserts")
   void removeTotpSecretSuccess() {
     String userId = "userId";
     when(accessControl.isGenerateTotpUrlAllowed(userId)).thenReturn(true);
@@ -49,5 +50,6 @@ class RemoveTotpSecretUseCaseTest {
     useCase.removeTotpSecret(userId);
 
     verify(vault).deleteSecret(VaultEntryNames.TOTP_SECRET);
+    verify(vault).deleteSecret(VaultEntryNames.TOTP_SECRET_PENDING);
   }
 }
