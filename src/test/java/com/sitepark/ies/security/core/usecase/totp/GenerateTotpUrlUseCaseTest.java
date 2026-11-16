@@ -73,6 +73,6 @@ class GenerateTotpUrlUseCaseTest {
 
     assertEquals(expectedTotpUrl, totpUrl, "Generated TOTP URL does not match expected value");
 
-    verify(userVault).storeSecret(VaultEntryNames.TOTP_SECRET, "secret");
+    verify(userVault).storeSecret(VaultEntryNames.TOTP_SECRET_PENDING, "secret");
   }
 }

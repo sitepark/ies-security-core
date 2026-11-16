@@ -1,8 +1,12 @@
 package com.sitepark.ies.security.core.usecase.password;
 
+import com.sitepark.ies.security.core.domain.service.AuthenticationPolicyService;
+import com.sitepark.ies.security.core.domain.value.AuthenticationFailureReason;
 import com.sitepark.ies.security.core.domain.value.AuthenticationRequirement;
 import com.sitepark.ies.security.core.domain.value.AuthenticationResult;
 import com.sitepark.ies.security.core.domain.value.PartialAuthenticationState;
+import com.sitepark.ies.security.core.domain.value.PolicyDecision;
+import com.sitepark.ies.security.core.domain.value.PolicyNotice;
 import com.sitepark.ies.security.core.port.AuthenticationAttemptLimiter;
 import com.sitepark.ies.security.core.port.LdapAuthenticator;
 import com.sitepark.ies.security.core.port.TotpAuthenticationProcessStore;
@@ -36,6 +40,8 @@ public class PasswordAuthenticationUseCase {
 
   private final TotpAuthenticationProcessStore authenticationProcessStore;
 
+  private final AuthenticationPolicyService policyService;
+
   private static final Logger LOGGER = LogManager.getLogger();
 
   @Inject
@@ -45,13 +51,15 @@ public class PasswordAuthenticationUseCase {
       LdapAuthenticator ldapAuthenticator,
       PasswordEncoder passwordEncoder,
       AuthenticationAttemptLimiter loginAttemptLimiter,
-      TotpAuthenticationProcessStore authenticationProcessStore) {
+      TotpAuthenticationProcessStore authenticationProcessStore,
+      AuthenticationPolicyService policyService) {
     this.clock = clock;
     this.userService = userService;
     this.ldapAuthenticator = ldapAuthenticator;
     this.passwordEncoder = passwordEncoder;
     this.loginAttemptLimiter = loginAttemptLimiter;
     this.authenticationProcessStore = authenticationProcessStore;
+    this.policyService = policyService;
   }
 
   public AuthenticationResult passwordAuthentication(
@@ -123,8 +131,18 @@ public class PasswordAuthenticationUseCase {
 
   private AuthenticationResult buildAuthenticationResult(User user, String purpose) {
 
-    if (user.authFactors().isEmpty()) {
-      return AuthenticationResult.success(user, purpose);
+    boolean secondFactorFollows = !user.authFactors().isEmpty();
+    PolicyDecision decision = this.policyService.decidePasswordLogin(user, secondFactorFollows);
+    if (decision instanceof PolicyDecision.Denied(AuthenticationFailureReason reason)) {
+      if (LOGGER.isInfoEnabled()) {
+        LOGGER.info("Password login of user '{}' refused by policy: {}", user.username(), reason);
+      }
+      return AuthenticationResult.failure(reason);
+    }
+
+    if (!secondFactorFollows) {
+      PolicyNotice notice = ((PolicyDecision.Allowed) decision).notice();
+      return AuthenticationResult.success(user, purpose).withPolicyNotice(notice);
     }
 
     List<AuthenticationRequirement> requirements = getLoginRequirements(user);

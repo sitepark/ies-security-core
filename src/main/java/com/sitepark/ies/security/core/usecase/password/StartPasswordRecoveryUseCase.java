@@ -1,6 +1,7 @@
 package com.sitepark.ies.security.core.usecase.password;
 
 import com.sitepark.ies.security.core.domain.exception.StartPasswordRecoveryException;
+import com.sitepark.ies.security.core.domain.service.AuthenticationPolicyService;
 import com.sitepark.ies.security.core.port.UserService;
 import com.sitepark.ies.sharedkernel.email.Email;
 import com.sitepark.ies.sharedkernel.email.EmailAddress;
@@ -31,26 +32,34 @@ public final class StartPasswordRecoveryUseCase {
 
   private final EmailService emailService;
 
+  private final AuthenticationPolicyService policyService;
+
   @Inject
   StartPasswordRecoveryUseCase(
       UserService userService,
       CodeVerificationService codeVerificationService,
-      EmailService emailService) {
+      EmailService emailService,
+      AuthenticationPolicyService policyService) {
     this.userService = userService;
     this.codeVerificationService = codeVerificationService;
     this.emailService = emailService;
+    this.policyService = policyService;
   }
 
   public StartPasswordRecoveryResult startPasswordRecovery(StartPasswordRecoveryRequest request) {
 
     // A challenge is started for every username, also for unknown users and users without an
-    // email address. Its code is only sent to existing users, but all requests are answered the
-    // same way and repeated requests for the same username are limited the same way.
+    // email address. Its code is only sent to existing users whose policy still allows a password,
+    // but all requests are answered the same way and repeated requests for the same username are
+    // limited the same way.
     PasswordRecoverPayload payload = new PasswordRecoverPayload(request.username());
     CodeVerificationChallenge challenge = this.codeVerificationService.startChallenge(payload);
 
     Optional<User> optUser = this.userService.findByUsername(request.username());
-    if (challenge.sendCode() && optUser.isPresent() && optUser.get().email() != null) {
+    if (challenge.sendCode()
+        && optUser.isPresent()
+        && optUser.get().email() != null
+        && this.policyService.isPasswordRecoveryAllowed(optUser.get())) {
       this.sendEmail(request, optUser.get(), challenge);
     }
 

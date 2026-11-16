@@ -2,13 +2,20 @@ package com.sitepark.ies.security.core.usecase.password;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.sitepark.ies.security.core.domain.service.AuthenticationPolicyService;
+import com.sitepark.ies.security.core.domain.value.AuthenticationFailureReason;
+import com.sitepark.ies.security.core.domain.value.AuthenticationPolicyLevel;
 import com.sitepark.ies.security.core.domain.value.AuthenticationRequirement;
 import com.sitepark.ies.security.core.domain.value.AuthenticationResult;
 import com.sitepark.ies.security.core.domain.value.PartialAuthenticationState;
+import com.sitepark.ies.security.core.domain.value.PolicyDecision;
+import com.sitepark.ies.security.core.domain.value.PolicyNotice;
 import com.sitepark.ies.security.core.port.AuthenticationAttemptLimiter;
 import com.sitepark.ies.security.core.port.LdapAuthenticator;
 import com.sitepark.ies.security.core.port.TotpAuthenticationProcessStore;
@@ -27,7 +34,10 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+@SuppressWarnings("PMD.ExcessiveImports")
 class PasswordAuthenticationUseCaseTest {
+
+  private AuthenticationPolicyService policyService;
 
   private final Clock fixedClock =
       Clock.fixed(OffsetDateTime.now().toInstant(), ZoneId.systemDefault());
@@ -47,6 +57,11 @@ class PasswordAuthenticationUseCaseTest {
     loginAttemptLimiter = mock();
     authenticationProcessStore = mock();
 
+    this.policyService = mock();
+
+    when(this.policyService.decidePasswordLogin(any(), anyBoolean()))
+        .thenReturn(new PolicyDecision.Allowed(null));
+
     useCase =
         new PasswordAuthenticationUseCase(
             fixedClock,
@@ -54,7 +69,8 @@ class PasswordAuthenticationUseCaseTest {
             ldapAuthenticator,
             passwordEncoder,
             loginAttemptLimiter,
-            authenticationProcessStore);
+            authenticationProcessStore,
+            policyService);
   }
 
   @Test
@@ -204,5 +220,49 @@ class PasswordAuthenticationUseCaseTest {
         AuthenticationResult.success(user, "purpose"),
         this.useCase.passwordAuthentication("username", "password", "purpose"),
         "Expected successful LDAP authentication");
+  }
+
+  @Test
+  @SuppressWarnings("PMD.UnitTestContainsTooManyAsserts")
+  void testRefusedByPolicyAfterCorrectPassword() {
+    when(this.loginAttemptLimiter.accept(any())).thenReturn(true);
+    User user =
+        User.builder()
+            .id("1")
+            .username("username")
+            .lastName("Test")
+            .authFactors(AuthFactor.TOTP)
+            .build();
+    when(this.userService.findByUsername(any())).thenReturn(Optional.of(user));
+    when(this.userService.getPasswordHash(any())).thenReturn(Optional.of("hashedPassword"));
+    when(this.passwordEncoder.matches(any(), any())).thenReturn(true);
+    when(this.policyService.decidePasswordLogin(user, true))
+        .thenReturn(new PolicyDecision.Denied(AuthenticationFailureReason.PASSKEY_REQUIRED));
+
+    assertEquals(
+        AuthenticationResult.failure(AuthenticationFailureReason.PASSKEY_REQUIRED),
+        this.useCase.passwordAuthentication("username", "password", "purpose"),
+        "the policy must refuse the password");
+    verify(this.authenticationProcessStore, never()).store(any());
+    verify(this.loginAttemptLimiter, never()).onFailedLogin(any());
+  }
+
+  @Test
+  void testSuccessWithNotice() {
+    when(this.loginAttemptLimiter.accept(any())).thenReturn(true);
+    User user = User.builder().id("1").username("username").lastName("Test").build();
+    when(this.userService.findByUsername(any())).thenReturn(Optional.of(user));
+    when(this.userService.getPasswordHash(any())).thenReturn(Optional.of("hashedPassword"));
+    when(this.passwordEncoder.matches(any(), any())).thenReturn(true);
+    PolicyNotice notice =
+        new PolicyNotice(
+            AuthenticationPolicyLevel.SECOND_FACTOR, Instant.parse("2026-12-01T00:00:00Z"));
+    when(this.policyService.decidePasswordLogin(user, false))
+        .thenReturn(new PolicyDecision.Allowed(notice));
+
+    assertEquals(
+        AuthenticationResult.success(user, "purpose").withPolicyNotice(notice),
+        this.useCase.passwordAuthentication("username", "password", "purpose"),
+        "the notice must be passed on");
   }
 }

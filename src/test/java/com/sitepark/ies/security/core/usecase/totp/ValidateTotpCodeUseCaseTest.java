@@ -3,6 +3,7 @@ package com.sitepark.ies.security.core.usecase.totp;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -11,20 +12,28 @@ import static org.mockito.Mockito.when;
 
 import com.sitepark.ies.security.core.domain.exception.AuthenticationProcessNotFoundException;
 import com.sitepark.ies.security.core.domain.exception.TotpNotRequiredException;
+import com.sitepark.ies.security.core.domain.service.AuthenticationPolicyService;
+import com.sitepark.ies.security.core.domain.value.AuthenticationFailureReason;
+import com.sitepark.ies.security.core.domain.value.AuthenticationPolicyLevel;
 import com.sitepark.ies.security.core.domain.value.AuthenticationRequirement;
 import com.sitepark.ies.security.core.domain.value.AuthenticationResult;
 import com.sitepark.ies.security.core.domain.value.PartialAuthenticationState;
+import com.sitepark.ies.security.core.domain.value.PolicyDecision;
+import com.sitepark.ies.security.core.domain.value.PolicyNotice;
 import com.sitepark.ies.security.core.port.TotpAuthenticationProcessStore;
 import com.sitepark.ies.security.core.port.TotpProvider;
 import com.sitepark.ies.security.core.port.Vault;
 import com.sitepark.ies.security.core.port.VaultProvider;
 import com.sitepark.ies.sharedkernel.security.User;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class ValidateTotpCodeUseCaseTest {
+
+  private AuthenticationPolicyService policyService;
   private TotpProvider totpProvider;
   private VaultProvider vaultProvider;
   private TotpAuthenticationProcessStore authenticationProcessStore;
@@ -37,8 +46,14 @@ class ValidateTotpCodeUseCaseTest {
     this.vaultProvider = mock(VaultProvider.class);
     this.authenticationProcessStore = mock(TotpAuthenticationProcessStore.class);
 
+    this.policyService = mock();
+
+    when(this.policyService.decidePasswordLogin(any(), anyBoolean()))
+        .thenReturn(new PolicyDecision.Allowed(null));
+
     this.useCase =
-        new ValidateTotpCodeUseCase(totpProvider, vaultProvider, authenticationProcessStore);
+        new ValidateTotpCodeUseCase(
+            totpProvider, vaultProvider, authenticationProcessStore, policyService);
   }
 
   @Test
@@ -140,5 +155,47 @@ class ValidateTotpCodeUseCaseTest {
         this.useCase.validateTotpCode("testProcessId", 123456),
         "Expected successful TOTP code validation");
     verify(this.authenticationProcessStore, never()).remove(any());
+  }
+
+  @Test
+  void testRefusedByPolicy() {
+    User user = User.builder().id("123").username("peterpan").lastName("Pan").build();
+    PartialAuthenticationState authState =
+        new PartialAuthenticationState(
+            user, null, List.of(AuthenticationRequirement.TOTP_CODE_REQUIRED), null, "purpose");
+    Vault userVault = mock();
+    when(this.vaultProvider.getUserVault(any())).thenReturn(userVault);
+    when(this.authenticationProcessStore.retrieve(any())).thenReturn(Optional.of(authState));
+    when(userVault.loadSecret(any())).thenReturn("secret");
+    when(this.totpProvider.validateTotpCode(any(), anyInt())).thenReturn(true);
+    when(this.policyService.decidePasswordLogin(user, true))
+        .thenReturn(new PolicyDecision.Denied(AuthenticationFailureReason.PASSKEY_REQUIRED));
+
+    assertEquals(
+        AuthenticationResult.failure(AuthenticationFailureReason.PASSKEY_REQUIRED),
+        this.useCase.validateTotpCode("testProcessId", 123456),
+        "the policy must be able to refuse after the TOTP step");
+  }
+
+  @Test
+  void testSuccessWithNotice() {
+    User user = User.builder().id("123").username("peterpan").lastName("Pan").build();
+    PartialAuthenticationState authState =
+        new PartialAuthenticationState(
+            user, null, List.of(AuthenticationRequirement.TOTP_CODE_REQUIRED), null, "purpose");
+    Vault userVault = mock();
+    when(this.vaultProvider.getUserVault(any())).thenReturn(userVault);
+    when(this.authenticationProcessStore.retrieve(any())).thenReturn(Optional.of(authState));
+    when(userVault.loadSecret(any())).thenReturn("secret");
+    when(this.totpProvider.validateTotpCode(any(), anyInt())).thenReturn(true);
+    PolicyNotice notice =
+        new PolicyNotice(AuthenticationPolicyLevel.PASSKEY, Instant.parse("2026-12-01T00:00:00Z"));
+    when(this.policyService.decidePasswordLogin(user, true))
+        .thenReturn(new PolicyDecision.Allowed(notice));
+
+    assertEquals(
+        AuthenticationResult.success(user, "purpose").withPolicyNotice(notice),
+        this.useCase.validateTotpCode("testProcessId", 123456),
+        "the notice must be passed on after the TOTP step");
   }
 }

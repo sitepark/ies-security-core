@@ -24,5 +24,6 @@ public class RemoveTotpSecretUseCase {
     }
 
     this.vaultProvider.getUserVault(userId).deleteSecret(VaultEntryNames.TOTP_SECRET);
+    this.vaultProvider.getUserVault(userId).deleteSecret(VaultEntryNames.TOTP_SECRET_PENDING);
   }
 }
