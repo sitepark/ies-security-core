@@ -46,6 +46,15 @@ public class AccessControl {
     return userId != null && this.isWebAuthnGetRegisteredCredentialsAllowed(userId);
   }
 
+  public boolean isGetAuthenticationPolicyAllowed(String userId) {
+    return this.isAuthenticatedUserOrHasFullAccess(userId);
+  }
+
+  public boolean isSetAuthenticationPolicyAllowed() {
+    Authentication authentication = this.authenticationProvider.get();
+    return authentication != null && authentication.hasFullAccess();
+  }
+
   public boolean isSetPasswordAllowed(final String userId) {
     return this.isAuthenticatedUserOrHasFullAccess(userId);
   }

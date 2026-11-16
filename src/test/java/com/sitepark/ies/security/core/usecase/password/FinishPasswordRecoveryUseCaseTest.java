@@ -6,10 +6,12 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.sitepark.ies.security.core.domain.exception.FinishPasswordRecoveryException;
+import com.sitepark.ies.security.core.domain.service.AuthenticationPolicyService;
 import com.sitepark.ies.security.core.domain.service.SetPasswordService;
 import com.sitepark.ies.security.core.port.UserService;
 import com.sitepark.ies.sharedkernel.email.EmailAddress;
@@ -30,6 +32,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class FinishPasswordRecoveryUseCaseTest {
+
+  private AuthenticationPolicyService policyService;
 
   private static final EmailMessageThemeIdentifier THEME =
       EmailMessageThemeIdentifier.of("registration", "test");
@@ -53,12 +57,17 @@ class FinishPasswordRecoveryUseCaseTest {
     this.setPasswordService = mock();
     this.emailService = mock();
 
+    this.policyService = mock();
+
+    when(this.policyService.isPasswordRecoveryAllowed(any())).thenReturn(true);
+
     this.useCase =
         new FinishPasswordRecoveryUseCase(
             this.codeVerificationService,
             this.userService,
             this.setPasswordService,
-            this.emailService);
+            this.emailService,
+            this.policyService);
   }
 
   @Test
@@ -300,5 +309,36 @@ class FinishPasswordRecoveryUseCaseTest {
     this.useCase.finishPasswordRecovery(request);
 
     verify(this.userService).findByUsername("validUser");
+  }
+
+  @Test
+  @SuppressWarnings("PMD.UnitTestContainsTooManyAsserts")
+  void testRefusedByPolicy() {
+
+    User user = mock(User.class);
+    when(user.id()).thenReturn("user123");
+    PasswordRecoverPayload payload = new PasswordRecoverPayload("validUser");
+    CodeVerificationChallenge challenge =
+        new CodeVerificationChallenge(
+            "challenge-789",
+            789012,
+            payload,
+            Instant.parse("2025-01-01T10:00:00Z"),
+            Instant.parse("2025-01-01T10:15:00Z"),
+            0);
+    when(this.codeVerificationService.finishChallenge("challenge-789", 789012))
+        .thenReturn(challenge);
+    when(this.userService.findByUsername("validUser")).thenReturn(Optional.of(user));
+    when(this.policyService.isPasswordRecoveryAllowed(user)).thenReturn(false);
+
+    FinishPasswordRecoveryRequest request =
+        new FinishPasswordRecoveryRequest(
+            "challenge-789", 789012, "newSecurePassword", EMAIL_PARAMETERS);
+
+    assertThrows(
+        CodeVerificationFailedException.class,
+        () -> this.useCase.finishPasswordRecovery(request),
+        "a code must not set a password after the passkey deadline");
+    verify(this.setPasswordService, never()).setPassword(any(), any());
   }
 }

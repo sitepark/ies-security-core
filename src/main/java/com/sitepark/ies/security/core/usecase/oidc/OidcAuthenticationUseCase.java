@@ -1,7 +1,10 @@
 package com.sitepark.ies.security.core.usecase.oidc;
 
+import com.sitepark.ies.security.core.domain.service.AuthenticationPolicyService;
+import com.sitepark.ies.security.core.domain.value.AuthenticationFailureReason;
 import com.sitepark.ies.security.core.domain.value.AuthenticationResult;
 import com.sitepark.ies.security.core.domain.value.OidcUser;
+import com.sitepark.ies.security.core.domain.value.PolicyDecision;
 import com.sitepark.ies.security.core.port.OidcAuthenticator;
 import com.sitepark.ies.security.core.port.UserService;
 import com.sitepark.ies.sharedkernel.security.AuthMethod;
@@ -17,11 +20,16 @@ public class OidcAuthenticationUseCase {
 
   private final UserService userService;
 
+  private final AuthenticationPolicyService policyService;
+
   @Inject
   protected OidcAuthenticationUseCase(
-      OidcAuthenticator oAuth2Authenticator, UserService userService) {
+      OidcAuthenticator oAuth2Authenticator,
+      UserService userService,
+      AuthenticationPolicyService policyService) {
     this.oidcAuthenticator = oAuth2Authenticator;
     this.userService = userService;
+    this.policyService = policyService;
   }
 
   public AuthenticationResult oidcAuthentication(
@@ -44,9 +52,15 @@ public class OidcAuthenticationUseCase {
         new AuthenticationContext(providerType, null, AuthMethod.OAUTH2, oidcUser.id());
 
     Optional<User> syncedUser = this.userService.syncAuthenticatedUser(context, user);
+    if (syncedUser.isEmpty()) {
+      return AuthenticationResult.failure();
+    }
 
-    return syncedUser
-        .map(value -> AuthenticationResult.success(value, applicationName))
-        .orElseGet(AuthenticationResult::failure);
+    PolicyDecision decision = this.policyService.decideExternalLogin(syncedUser.get());
+    if (decision instanceof PolicyDecision.Denied(AuthenticationFailureReason reason)) {
+      return AuthenticationResult.failure(reason);
+    }
+    return AuthenticationResult.success(syncedUser.get(), applicationName)
+        .withPolicyNotice(((PolicyDecision.Allowed) decision).notice());
   }
 }

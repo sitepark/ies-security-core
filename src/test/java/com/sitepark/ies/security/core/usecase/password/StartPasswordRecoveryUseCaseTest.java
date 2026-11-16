@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.sitepark.ies.security.core.domain.exception.StartPasswordRecoveryException;
+import com.sitepark.ies.security.core.domain.service.AuthenticationPolicyService;
 import com.sitepark.ies.security.core.port.UserService;
 import com.sitepark.ies.sharedkernel.email.EmailAddress;
 import com.sitepark.ies.sharedkernel.email.EmailMessageThemeIdentifier;
@@ -29,6 +30,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class StartPasswordRecoveryUseCaseTest {
+
+  private AuthenticationPolicyService policyService;
 
   private static final EmailMessageThemeIdentifier THEME =
       EmailMessageThemeIdentifier.of("registration", "test");
@@ -50,9 +53,13 @@ class StartPasswordRecoveryUseCaseTest {
     this.userService = mock();
     this.emailService = mock();
 
+    this.policyService = mock();
+
+    when(this.policyService.isPasswordRecoveryAllowed(any())).thenReturn(true);
+
     this.useCase =
         new StartPasswordRecoveryUseCase(
-            this.userService, this.codeVerificationService, this.emailService);
+            this.userService, this.codeVerificationService, this.emailService, this.policyService);
   }
 
   @Test
@@ -347,6 +354,34 @@ class StartPasswordRecoveryUseCaseTest {
 
     this.useCase.startPasswordRecovery(request);
 
+    verify(this.emailService, never()).send(any());
+  }
+
+  @Test
+  @SuppressWarnings("PMD.UnitTestContainsTooManyAsserts")
+  void testRefusedByPolicySendsNoEmail() throws EmailSendException {
+
+    User user = mock(User.class);
+    when(user.email()).thenReturn("user@example.com");
+    when(this.userService.findByUsername("validUser")).thenReturn(Optional.of(user));
+    when(this.policyService.isPasswordRecoveryAllowed(user)).thenReturn(false);
+
+    CodeVerificationChallenge challenge =
+        new CodeVerificationChallenge(
+            "challenge-791",
+            789012,
+            new PasswordRecoverPayload("validUser"),
+            Instant.parse("2025-01-01T10:00:00Z"),
+            Instant.parse("2025-01-01T10:15:00Z"),
+            0);
+    when(this.codeVerificationService.startChallenge(any(PasswordRecoverPayload.class)))
+        .thenReturn(challenge);
+
+    StartPasswordRecoveryResult result =
+        this.useCase.startPasswordRecovery(
+            new StartPasswordRecoveryRequest("validUser", EMAIL_PARAMETERS));
+
+    assertEquals("challenge-791", result.challengeId(), "the answer must not reveal the policy");
     verify(this.emailService, never()).send(any());
   }
 }

@@ -1,6 +1,7 @@
 package com.sitepark.ies.security.core.usecase.password;
 
 import com.sitepark.ies.security.core.domain.exception.FinishPasswordRecoveryException;
+import com.sitepark.ies.security.core.domain.service.AuthenticationPolicyService;
 import com.sitepark.ies.security.core.domain.service.SetPasswordService;
 import com.sitepark.ies.security.core.port.UserService;
 import com.sitepark.ies.sharedkernel.email.Email;
@@ -33,16 +34,20 @@ public class FinishPasswordRecoveryUseCase {
 
   private final EmailService emailService;
 
+  private final AuthenticationPolicyService policyService;
+
   @Inject
   FinishPasswordRecoveryUseCase(
       CodeVerificationService codeVerificationService,
       UserService userService,
       SetPasswordService setPasswordService,
-      EmailService emailService) {
+      EmailService emailService,
+      AuthenticationPolicyService policyService) {
     this.codeVerificationService = codeVerificationService;
     this.userService = userService;
     this.setPasswordService = setPasswordService;
     this.emailService = emailService;
+    this.policyService = policyService;
   }
 
   public void finishPasswordRecovery(FinishPasswordRecoveryRequest request) {
@@ -57,6 +62,11 @@ public class FinishPasswordRecoveryUseCase {
         this.userService
             .findByUsername(username)
             .orElseThrow(() -> new CodeVerificationFailedException("User not found"));
+
+    // a code sent before the passkey deadline must not bring the password back afterwards
+    if (!this.policyService.isPasswordRecoveryAllowed(user)) {
+      throw new CodeVerificationFailedException("Password recovery not allowed by policy");
+    }
 
     this.setPasswordService.setPassword(user.id(), request.newPassword());
 

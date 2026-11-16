@@ -14,6 +14,8 @@ public final class AuthenticationResult {
   @Nullable private final String authProcessId; // für PARTIAL-Logins
   private final List<AuthenticationRequirement> requirements;
   @Nullable private final String purpose;
+  @Nullable private final PolicyNotice policyNotice;
+  @Nullable private final AuthenticationFailureReason failureReason;
 
   private AuthenticationResult(
       AuthenticationStatus status,
@@ -21,16 +23,30 @@ public final class AuthenticationResult {
       @Nullable String authProcessId,
       @Nullable List<AuthenticationRequirement> requirements,
       @Nullable String purpose) {
+    this(status, user, authProcessId, requirements, purpose, null, null);
+  }
+
+  private AuthenticationResult(
+      AuthenticationStatus status,
+      @Nullable User user,
+      @Nullable String authProcessId,
+      @Nullable List<AuthenticationRequirement> requirements,
+      @Nullable String purpose,
+      @Nullable PolicyNotice policyNotice,
+      @Nullable AuthenticationFailureReason failureReason) {
     this.status = status;
     this.user = user;
     this.authProcessId = authProcessId;
     this.requirements = requirements != null ? requirements : List.of();
     this.purpose = purpose;
+    this.policyNotice = policyNotice;
+    this.failureReason = failureReason;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(status, user, authProcessId, requirements, purpose);
+    return Objects.hash(
+        status, user, authProcessId, requirements, purpose, policyNotice, failureReason);
   }
 
   @Override
@@ -42,7 +58,9 @@ public final class AuthenticationResult {
         && Objects.equals(this.user, that.user)
         && Objects.equals(this.authProcessId, that.authProcessId)
         && Objects.equals(this.requirements, that.requirements)
-        && Objects.equals(this.purpose, that.purpose);
+        && Objects.equals(this.purpose, that.purpose)
+        && Objects.equals(this.policyNotice, that.policyNotice)
+        && Objects.equals(this.failureReason, that.failureReason);
   }
 
   @Override
@@ -60,6 +78,10 @@ public final class AuthenticationResult {
         + ", purpose='"
         + purpose
         + '\''
+        + ", policyNotice="
+        + policyNotice
+        + ", failureReason="
+        + failureReason
         + '}';
   }
 
@@ -75,6 +97,25 @@ public final class AuthenticationResult {
 
   public static AuthenticationResult failure() {
     return new AuthenticationResult(AuthenticationStatus.FAILURE, null, null, List.of(), null);
+  }
+
+  /** A failed login whose credentials were correct but which the user's policy refuses. */
+  public static AuthenticationResult failure(AuthenticationFailureReason reason) {
+    Objects.requireNonNull(reason, "reason cannot be null");
+    return new AuthenticationResult(
+        AuthenticationStatus.FAILURE, null, null, List.of(), null, null, reason);
+  }
+
+  /** Returns a copy of this result that reminds the user of a coming requirement. */
+  public AuthenticationResult withPolicyNotice(@Nullable PolicyNotice notice) {
+    return new AuthenticationResult(
+        this.status,
+        this.user,
+        this.authProcessId,
+        this.requirements,
+        this.purpose,
+        notice,
+        this.failureReason);
   }
 
   @JsonProperty
@@ -100,5 +141,15 @@ public final class AuthenticationResult {
   @JsonProperty
   public List<AuthenticationRequirement> requirements() {
     return List.copyOf(requirements);
+  }
+
+  @JsonProperty
+  public @Nullable PolicyNotice policyNotice() {
+    return policyNotice;
+  }
+
+  @JsonProperty
+  public @Nullable AuthenticationFailureReason failureReason() {
+    return failureReason;
   }
 }
