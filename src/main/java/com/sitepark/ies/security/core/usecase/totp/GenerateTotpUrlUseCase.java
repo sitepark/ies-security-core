@@ -1,6 +1,8 @@
 package com.sitepark.ies.security.core.usecase.totp;
 
 import com.sitepark.ies.security.core.domain.service.AccessControl;
+import com.sitepark.ies.security.core.domain.service.AuthenticationPolicyService;
+import com.sitepark.ies.security.core.domain.value.AuthFactorType;
 import com.sitepark.ies.security.core.domain.value.TotpUrl;
 import com.sitepark.ies.security.core.domain.value.VaultEntryNames;
 import com.sitepark.ies.security.core.port.TotpProvider;
@@ -17,12 +19,16 @@ public class GenerateTotpUrlUseCase {
   private final UserService userService;
   private final VaultProvider vaultProvider;
 
+  private final AuthenticationPolicyService policyService;
+
   @Inject
   protected GenerateTotpUrlUseCase(
       TotpProvider totpProvider,
       VaultProvider vaultProvider,
       AccessControl accessControl,
-      UserService userService) {
+      UserService userService,
+      AuthenticationPolicyService policyService) {
+    this.policyService = policyService;
     this.totpProvider = totpProvider;
     this.vaultProvider = vaultProvider;
     this.accessControl = accessControl;
@@ -30,6 +36,7 @@ public class GenerateTotpUrlUseCase {
   }
 
   public TotpUrl generateTotpUrl(String userId, String issuer) {
+    this.policyService.requireFactorAllowed(AuthFactorType.TOTP);
 
     if (!this.accessControl.isGenerateTotpUrlAllowed(userId)) {
       throw this.createAccessDeniedException(userId);

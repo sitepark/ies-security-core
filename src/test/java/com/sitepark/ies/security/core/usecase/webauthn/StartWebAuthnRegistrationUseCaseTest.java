@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.sitepark.ies.security.core.domain.service.AccessControl;
+import com.sitepark.ies.security.core.domain.service.AuthenticationPolicyService;
 import com.sitepark.ies.security.core.port.UserService;
 import com.sitepark.ies.security.core.port.WebAuthnProvider;
 import com.sitepark.ies.sharedkernel.security.AccessDeniedException;
@@ -32,7 +33,8 @@ class StartWebAuthnRegistrationUseCaseTest {
     this.webAuthnProvider = mock();
 
     this.useCase =
-        new StartWebAuthnRegistrationUseCase(userService, accessControl, webAuthnProvider);
+        new StartWebAuthnRegistrationUseCase(
+            userService, accessControl, webAuthnProvider, mock(AuthenticationPolicyService.class));
   }
 
   @Test

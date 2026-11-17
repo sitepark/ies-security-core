@@ -1,6 +1,8 @@
 package com.sitepark.ies.security.core.usecase.totp;
 
 import com.sitepark.ies.security.core.domain.service.AccessControl;
+import com.sitepark.ies.security.core.domain.service.AuthenticationPolicyService;
+import com.sitepark.ies.security.core.domain.value.AuthFactorType;
 import com.sitepark.ies.security.core.domain.value.VaultEntryNames;
 import com.sitepark.ies.security.core.port.TotpProvider;
 import com.sitepark.ies.security.core.port.Vault;
@@ -19,9 +21,15 @@ public class ConfirmTotpSecretUseCase {
   private final VaultProvider vaultProvider;
   private final AccessControl accessControl;
 
+  private final AuthenticationPolicyService policyService;
+
   @Inject
   protected ConfirmTotpSecretUseCase(
-      TotpProvider totpProvider, VaultProvider vaultProvider, AccessControl accessControl) {
+      TotpProvider totpProvider,
+      VaultProvider vaultProvider,
+      AccessControl accessControl,
+      AuthenticationPolicyService policyService) {
+    this.policyService = policyService;
     this.totpProvider = totpProvider;
     this.vaultProvider = vaultProvider;
     this.accessControl = accessControl;
@@ -32,6 +40,7 @@ public class ConfirmTotpSecretUseCase {
    * is no secret to confirm or the code was wrong.
    */
   public boolean confirmTotpSecret(String userId, int totpCode) {
+    this.policyService.requireFactorAllowed(AuthFactorType.TOTP);
     if (!this.accessControl.isGenerateTotpUrlAllowed(userId)) {
       throw new AccessDeniedException(
           "Confirming a TOTP secret is not allowed for user: " + userId);

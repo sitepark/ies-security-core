@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.sitepark.ies.security.core.domain.service.AccessControl;
+import com.sitepark.ies.security.core.domain.service.AuthenticationPolicyService;
 import com.sitepark.ies.security.core.domain.value.TotpUrl;
 import com.sitepark.ies.security.core.domain.value.VaultEntryNames;
 import com.sitepark.ies.security.core.port.TotpProvider;
@@ -38,7 +39,11 @@ class GenerateTotpUrlUseCaseTest {
 
     this.useCase =
         new GenerateTotpUrlUseCase(
-            this.totpProvider, this.vaultProvider, this.accessControl, this.userService);
+            this.totpProvider,
+            this.vaultProvider,
+            this.accessControl,
+            this.userService,
+            mock(AuthenticationPolicyService.class));
   }
 
   @Test

@@ -1,6 +1,8 @@
 package com.sitepark.ies.security.core.usecase.webauthn;
 
 import com.sitepark.ies.security.core.domain.service.AccessControl;
+import com.sitepark.ies.security.core.domain.service.AuthenticationPolicyService;
+import com.sitepark.ies.security.core.domain.value.AuthFactorType;
 import com.sitepark.ies.security.core.port.UserService;
 import com.sitepark.ies.security.core.port.WebAuthnProvider;
 import com.sitepark.ies.sharedkernel.security.AccessDeniedException;
@@ -16,15 +18,22 @@ public class StartWebAuthnRegistrationUseCase {
   private final AccessControl accessControl;
   private final WebAuthnProvider webAuthnProvider;
 
+  private final AuthenticationPolicyService policyService;
+
   @Inject
   protected StartWebAuthnRegistrationUseCase(
-      UserService userService, AccessControl accessControl, WebAuthnProvider webAuthnProvider) {
+      UserService userService,
+      AccessControl accessControl,
+      WebAuthnProvider webAuthnProvider,
+      AuthenticationPolicyService policyService) {
+    this.policyService = policyService;
     this.userService = userService;
     this.accessControl = accessControl;
     this.webAuthnProvider = webAuthnProvider;
   }
 
   public String startWebAuthnRegistration(WebAuthnRegistrationRequest request) {
+    this.policyService.requireFactorAllowed(AuthFactorType.PASSKEY);
 
     URI origin;
     try {

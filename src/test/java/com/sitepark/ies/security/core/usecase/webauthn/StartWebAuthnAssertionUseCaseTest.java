@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import com.sitepark.ies.security.core.domain.service.AuthenticationPolicyService;
 import com.sitepark.ies.security.core.port.WebAuthnProvider;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -19,7 +20,9 @@ class StartWebAuthnAssertionUseCaseTest {
   @BeforeEach
   void setUp() {
     this.webAuthnProvider = mock();
-    this.useCase = new StartWebAuthnAssertionUseCase(webAuthnProvider);
+    this.useCase =
+        new StartWebAuthnAssertionUseCase(
+            webAuthnProvider, mock(AuthenticationPolicyService.class));
   }
 
   @Test

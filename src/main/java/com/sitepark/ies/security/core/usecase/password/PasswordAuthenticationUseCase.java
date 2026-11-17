@@ -1,6 +1,7 @@
 package com.sitepark.ies.security.core.usecase.password;
 
 import com.sitepark.ies.security.core.domain.service.AuthenticationPolicyService;
+import com.sitepark.ies.security.core.domain.value.AuthFactorType;
 import com.sitepark.ies.security.core.domain.value.AuthenticationFailureReason;
 import com.sitepark.ies.security.core.domain.value.AuthenticationRequirement;
 import com.sitepark.ies.security.core.domain.value.AuthenticationResult;
@@ -131,7 +132,8 @@ public class PasswordAuthenticationUseCase {
 
   private AuthenticationResult buildAuthenticationResult(User user, String purpose) {
 
-    boolean secondFactorFollows = !user.authFactors().isEmpty();
+    // only factors the installation allows lead to a second step
+    boolean secondFactorFollows = this.policyService.hasAllowedSecondFactor(user);
     PolicyDecision decision = this.policyService.decidePasswordLogin(user, secondFactorFollows);
     if (decision instanceof PolicyDecision.Denied(AuthenticationFailureReason reason)) {
       if (LOGGER.isInfoEnabled()) {
@@ -191,15 +193,10 @@ public class PasswordAuthenticationUseCase {
 
   private List<AuthenticationRequirement> getLoginRequirements(User user) {
     List<AuthenticationRequirement> requirements = new ArrayList<>();
-    for (AuthFactor authFactor : user.authFactors()) {
-      if (authFactor == AuthFactor.TOTP) {
-        requirements.add(AuthenticationRequirement.TOTP_CODE_REQUIRED);
-      } else {
-        throw new IllegalStateException(
-            "Unsupported auth factor: " + authFactor + " for user: " + user.username());
-      }
+    if (user.authFactors().contains(AuthFactor.TOTP)
+        && this.policyService.isFactorAllowed(AuthFactorType.TOTP)) {
+      requirements.add(AuthenticationRequirement.TOTP_CODE_REQUIRED);
     }
-
     return requirements;
   }
 }

@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.sitepark.ies.security.core.domain.service.AccessControl;
+import com.sitepark.ies.security.core.domain.service.AuthenticationPolicyService;
 import com.sitepark.ies.security.core.domain.value.VaultEntryNames;
 import com.sitepark.ies.security.core.port.TotpProvider;
 import com.sitepark.ies.security.core.port.Vault;
@@ -34,7 +35,11 @@ class ConfirmTotpSecretUseCaseTest {
     VaultProvider vaultProvider = mock();
     when(vaultProvider.getUserVault("7")).thenReturn(this.vault);
     this.useCase =
-        new ConfirmTotpSecretUseCase(this.totpProvider, vaultProvider, this.accessControl);
+        new ConfirmTotpSecretUseCase(
+            this.totpProvider,
+            vaultProvider,
+            this.accessControl,
+            mock(AuthenticationPolicyService.class));
   }
 
   @Test

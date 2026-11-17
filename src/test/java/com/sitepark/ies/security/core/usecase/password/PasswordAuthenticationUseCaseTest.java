@@ -61,6 +61,10 @@ class PasswordAuthenticationUseCaseTest {
 
     when(this.policyService.decidePasswordLogin(any(), anyBoolean()))
         .thenReturn(new PolicyDecision.Allowed(null));
+    // by default every factor is allowed and a TOTP secret leads to the TOTP step
+    when(this.policyService.isFactorAllowed(any())).thenReturn(true);
+    when(this.policyService.hasAllowedSecondFactor(any()))
+        .thenAnswer(inv -> inv.<User>getArgument(0).authFactors().contains(AuthFactor.TOTP));
 
     useCase =
         new PasswordAuthenticationUseCase(
@@ -264,5 +268,26 @@ class PasswordAuthenticationUseCaseTest {
         AuthenticationResult.success(user, "purpose").withPolicyNotice(notice),
         this.useCase.passwordAuthentication("username", "password", "purpose"),
         "the notice must be passed on");
+  }
+
+  @Test
+  void testSwitchedOffTotpIsNotAsked() {
+    when(this.loginAttemptLimiter.accept(any())).thenReturn(true);
+    User user =
+        User.builder()
+            .id("1")
+            .username("username")
+            .lastName("Test")
+            .authFactors(AuthFactor.TOTP)
+            .build();
+    when(this.userService.findByUsername(any())).thenReturn(Optional.of(user));
+    when(this.userService.getPasswordHash(any())).thenReturn(Optional.of("hashedPassword"));
+    when(this.passwordEncoder.matches(any(), any())).thenReturn(true);
+    when(this.policyService.hasAllowedSecondFactor(user)).thenReturn(false);
+
+    assertEquals(
+        AuthenticationResult.success(user, "purpose"),
+        this.useCase.passwordAuthentication("username", "password", "purpose"),
+        "a switched-off TOTP must not be asked for");
   }
 }
