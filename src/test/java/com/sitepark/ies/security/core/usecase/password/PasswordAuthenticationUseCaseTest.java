@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.sitepark.ies.security.core.domain.service.AuthenticationPolicyService;
+import com.sitepark.ies.security.core.domain.service.EmailCodeService;
 import com.sitepark.ies.security.core.domain.value.AuthenticationFailureReason;
 import com.sitepark.ies.security.core.domain.value.AuthenticationPolicyLevel;
 import com.sitepark.ies.security.core.domain.value.AuthenticationRequirement;
@@ -37,6 +38,7 @@ import org.junit.jupiter.api.Test;
 class PasswordAuthenticationUseCaseTest {
 
   private AuthenticationPolicyService policyService;
+  private EmailCodeService emailCodeService;
 
   private final Clock fixedClock =
       Clock.fixed(Instant.parse("2026-11-17T10:00:00Z"), ZoneOffset.UTC);
@@ -57,13 +59,14 @@ class PasswordAuthenticationUseCaseTest {
     authenticationProcessStore = mock();
 
     this.policyService = mock();
+    this.emailCodeService = mock();
 
     when(this.policyService.decidePasswordLogin(any(), anyBoolean()))
         .thenReturn(new PolicyDecision.Allowed(null));
     // by default every factor is allowed and a TOTP secret leads to the TOTP step
     when(this.policyService.isFactorAllowed(any())).thenReturn(true);
     when(this.policyService.hasAllowedSecondFactor(any()))
-        .thenAnswer(inv -> inv.<User>getArgument(0).authFactors().contains(AuthFactor.TOTP));
+        .thenAnswer(inv -> !inv.<User>getArgument(0).authFactors().isEmpty());
 
     useCase =
         new PasswordAuthenticationUseCase(
@@ -73,7 +76,8 @@ class PasswordAuthenticationUseCaseTest {
             passwordEncoder,
             loginAttemptLimiter,
             authenticationProcessStore,
-            policyService);
+            policyService,
+            emailCodeService);
   }
 
   @Test
@@ -288,5 +292,39 @@ class PasswordAuthenticationUseCaseTest {
         AuthenticationResult.success(user, "purpose"),
         this.useCase.passwordAuthentication("username", "password", "purpose"),
         "a switched-off TOTP must not be asked for");
+  }
+
+  @Test
+  @SuppressWarnings("PMD.UnitTestContainsTooManyAsserts")
+  void testEmailCodeIsSentAtLogin() {
+    when(this.loginAttemptLimiter.accept(any())).thenReturn(true);
+    User user =
+        User.builder()
+            .id("1")
+            .username("username")
+            .lastName("Test")
+            .authFactors(AuthFactor.EMAIL_CODE)
+            .build();
+    when(this.userService.findByUsername(any())).thenReturn(Optional.of(user));
+    when(this.userService.getPasswordHash(any())).thenReturn(Optional.of("hashedPassword"));
+    when(this.passwordEncoder.matches(any(), any())).thenReturn(true);
+    when(this.emailCodeService.startLogin(user)).thenReturn(Optional.of("challenge-1"));
+    when(this.authenticationProcessStore.store(any())).thenReturn("123");
+    List<AuthenticationRequirement> requirements =
+        List.of(AuthenticationRequirement.EMAIL_CODE_REQUIRED);
+
+    assertEquals(
+        AuthenticationResult.partial("123", requirements),
+        this.useCase.passwordAuthentication("username", "password", "purpose"),
+        "the login must wait for the e-mail code");
+    verify(this.authenticationProcessStore)
+        .store(
+            new PartialAuthenticationState(
+                user,
+                AuthMethod.PASSWORD,
+                requirements,
+                Instant.now(this.fixedClock),
+                "purpose",
+                "challenge-1"));
   }
 }

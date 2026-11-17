@@ -80,5 +80,6 @@ class ConfirmTotpSecretUseCaseTest {
     assertTrue(this.useCase.confirmTotpSecret("7", 123_456), "a valid code must activate");
     verify(this.vault).storeSecret(VaultEntryNames.TOTP_SECRET, "new");
     verify(this.vault).deleteSecret(VaultEntryNames.TOTP_SECRET_PENDING);
+    verify(this.vault).deleteSecret(VaultEntryNames.EMAIL_CODE_ADDRESS);
   }
 }

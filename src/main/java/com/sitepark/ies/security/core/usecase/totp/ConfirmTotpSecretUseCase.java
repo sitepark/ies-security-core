@@ -55,6 +55,8 @@ public class ConfirmTotpSecretUseCase {
     }
     vault.storeSecret(VaultEntryNames.TOTP_SECRET, secret);
     vault.deleteSecret(VaultEntryNames.TOTP_SECRET_PENDING);
+    // a user has one code factor: the TOTP app replaces the e-mail code
+    vault.deleteSecret(VaultEntryNames.EMAIL_CODE_ADDRESS);
     return true;
   }
 }
