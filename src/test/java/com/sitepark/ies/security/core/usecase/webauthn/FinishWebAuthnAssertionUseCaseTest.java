@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.sitepark.ies.security.core.domain.service.AuthenticationPolicyService;
 import com.sitepark.ies.security.core.domain.value.AuthenticationResult;
 import com.sitepark.ies.security.core.domain.value.WebAuthnAssertionFinishResult;
 import com.sitepark.ies.security.core.port.UserService;
@@ -25,7 +26,9 @@ class FinishWebAuthnAssertionUseCaseTest {
   void setUp() {
     this.userService = mock();
     this.webAuthnProvider = mock();
-    this.useCase = new FinishWebAuthnAssertionUseCase(userService, webAuthnProvider);
+    this.useCase =
+        new FinishWebAuthnAssertionUseCase(
+            userService, webAuthnProvider, mock(AuthenticationPolicyService.class));
   }
 
   @Test

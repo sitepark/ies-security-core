@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.sitepark.ies.security.core.domain.service.AccessControl;
+import com.sitepark.ies.security.core.domain.service.AuthenticationPolicyService;
 import com.sitepark.ies.security.core.domain.value.AuthenticationPolicy;
 import com.sitepark.ies.security.core.domain.value.AuthenticationPolicyLevel;
 import com.sitepark.ies.security.core.port.AuthenticationPolicyRepository;
@@ -26,7 +27,9 @@ class SetAuthenticationPolicyUseCaseTest {
   void setUp() {
     this.accessControl = mock();
     this.repository = mock();
-    this.useCase = new SetAuthenticationPolicyUseCase(this.accessControl, this.repository);
+    this.useCase =
+        new SetAuthenticationPolicyUseCase(
+            this.accessControl, this.repository, mock(AuthenticationPolicyService.class));
   }
 
   @Test
