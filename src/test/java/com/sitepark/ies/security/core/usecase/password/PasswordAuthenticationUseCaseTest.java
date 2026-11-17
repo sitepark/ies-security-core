@@ -27,8 +27,7 @@ import com.sitepark.ies.sharedkernel.security.PasswordEncoder;
 import com.sitepark.ies.sharedkernel.security.User;
 import java.time.Clock;
 import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,7 +39,7 @@ class PasswordAuthenticationUseCaseTest {
   private AuthenticationPolicyService policyService;
 
   private final Clock fixedClock =
-      Clock.fixed(OffsetDateTime.now().toInstant(), ZoneId.systemDefault());
+      Clock.fixed(Instant.parse("2026-11-17T10:00:00Z"), ZoneOffset.UTC);
 
   private UserService userService;
   private LdapAuthenticator ldapAuthenticator;
