@@ -46,6 +46,10 @@ public class AccessControl {
     return userId != null && this.isWebAuthnGetRegisteredCredentialsAllowed(userId);
   }
 
+  public boolean isEmailCodeManageable(String userId) {
+    return this.isAuthenticatedUserOrHasFullAccess(userId);
+  }
+
   public boolean isGetAuthenticationPolicyAllowed(String userId) {
     return this.isAuthenticatedUserOrHasFullAccess(userId);
   }

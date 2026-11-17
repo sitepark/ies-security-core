@@ -1,6 +1,7 @@
 package com.sitepark.ies.security.core.usecase.password;
 
 import com.sitepark.ies.security.core.domain.service.AuthenticationPolicyService;
+import com.sitepark.ies.security.core.domain.service.EmailCodeService;
 import com.sitepark.ies.security.core.domain.value.AuthFactorType;
 import com.sitepark.ies.security.core.domain.value.AuthenticationFailureReason;
 import com.sitepark.ies.security.core.domain.value.AuthenticationRequirement;
@@ -43,6 +44,8 @@ public class PasswordAuthenticationUseCase {
 
   private final AuthenticationPolicyService policyService;
 
+  private final EmailCodeService emailCodeService;
+
   private static final Logger LOGGER = LogManager.getLogger();
 
   @Inject
@@ -53,7 +56,8 @@ public class PasswordAuthenticationUseCase {
       PasswordEncoder passwordEncoder,
       AuthenticationAttemptLimiter loginAttemptLimiter,
       TotpAuthenticationProcessStore authenticationProcessStore,
-      AuthenticationPolicyService policyService) {
+      AuthenticationPolicyService policyService,
+      EmailCodeService emailCodeService) {
     this.clock = clock;
     this.userService = userService;
     this.ldapAuthenticator = ldapAuthenticator;
@@ -61,6 +65,7 @@ public class PasswordAuthenticationUseCase {
     this.loginAttemptLimiter = loginAttemptLimiter;
     this.authenticationProcessStore = authenticationProcessStore;
     this.policyService = policyService;
+    this.emailCodeService = emailCodeService;
   }
 
   public AuthenticationResult passwordAuthentication(
@@ -149,10 +154,21 @@ public class PasswordAuthenticationUseCase {
 
     List<AuthenticationRequirement> requirements = getLoginRequirements(user);
 
+    // the code goes out now; the login process remembers its challenge
+    String emailCodeChallengeId = null;
+    if (requirements.contains(AuthenticationRequirement.EMAIL_CODE_REQUIRED)) {
+      emailCodeChallengeId = this.emailCodeService.startLogin(user).orElse(null);
+    }
+
     String authProcessId =
         this.authenticationProcessStore.store(
             new PartialAuthenticationState(
-                user, AuthMethod.PASSWORD, requirements, Instant.now(this.clock), purpose));
+                user,
+                AuthMethod.PASSWORD,
+                requirements,
+                Instant.now(this.clock),
+                purpose,
+                emailCodeChallengeId));
 
     return AuthenticationResult.partial(authProcessId, requirements);
   }
@@ -196,6 +212,9 @@ public class PasswordAuthenticationUseCase {
     if (user.authFactors().contains(AuthFactor.TOTP)
         && this.policyService.isFactorAllowed(AuthFactorType.TOTP)) {
       requirements.add(AuthenticationRequirement.TOTP_CODE_REQUIRED);
+    } else if (user.authFactors().contains(AuthFactor.EMAIL_CODE)
+        && this.policyService.isFactorAllowed(AuthFactorType.EMAIL_CODE)) {
+      requirements.add(AuthenticationRequirement.EMAIL_CODE_REQUIRED);
     }
     return requirements;
   }

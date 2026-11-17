@@ -84,8 +84,10 @@ public class AuthenticationPolicyService {
 
   /** Returns whether a password login of the user goes on to a second factor step. */
   public boolean hasAllowedSecondFactor(User user) {
-    return user.authFactors().contains(AuthFactor.TOTP)
-        && this.isFactorAllowed(AuthFactorType.TOTP);
+    return (user.authFactors().contains(AuthFactor.TOTP)
+            && this.isFactorAllowed(AuthFactorType.TOTP))
+        || (user.authFactors().contains(AuthFactor.EMAIL_CODE)
+            && this.isFactorAllowed(AuthFactorType.EMAIL_CODE));
   }
 
   /**

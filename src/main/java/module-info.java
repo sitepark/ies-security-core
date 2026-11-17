@@ -14,6 +14,7 @@ module com.sitepark.ies.security.core {
   exports com.sitepark.ies.security.core.usecase.oidc;
   exports com.sitepark.ies.security.core.usecase.password;
   exports com.sitepark.ies.security.core.usecase.policy;
+  exports com.sitepark.ies.security.core.usecase.emailcode;
 
   requires static org.jspecify;
   requires org.apache.logging.log4j;
