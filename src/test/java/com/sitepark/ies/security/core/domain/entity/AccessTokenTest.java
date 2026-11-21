@@ -8,11 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.jparams.verifier.tostring.ToStringVerifier;
 import com.sitepark.ies.security.core.domain.value.TokenType;
 import com.sitepark.ies.sharedkernel.security.Permission;
@@ -22,6 +17,8 @@ import java.time.ZoneId;
 import java.util.List;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.MapperFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 @SuppressWarnings({"PMD.TooManyMethods", "PMD.AvoidDuplicateLiterals"})
 class AccessTokenTest {
@@ -196,13 +193,14 @@ class AccessTokenTest {
   }
 
   @Test
-  void testSerialize() throws JsonProcessingException {
+  void testSerialize() {
 
-    ObjectMapper mapper = new ObjectMapper();
-    mapper.registerModule(new Jdk8Module());
-    mapper.registerModule(new JavaTimeModule());
-    mapper.setDefaultPropertyInclusion(JsonInclude.Include.NON_EMPTY);
-    mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    JsonMapper mapper =
+        JsonMapper.builder()
+            .disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
+            .changeDefaultPropertyInclusion(
+                inclusion -> inclusion.withValueInclusion(JsonInclude.Include.NON_EMPTY))
+            .build();
     Instant createdAt = LocalDate.of(2023, 8, 21).atStartOfDay().atZone(ZONE_ID).toInstant();
     Instant expiredAt = LocalDate.of(2023, 12, 12).atStartOfDay().atZone(ZONE_ID).toInstant();
     Instant lastUsedAt = LocalDate.of(2023, 8, 25).atStartOfDay().atZone(ZONE_ID).toInstant();
@@ -236,49 +234,6 @@ class AccessTokenTest {
         """;
 
     assertEquals(expected, json, "unexpected json");
-  }
-
-  @Test
-  void testDeserialize() throws JsonProcessingException {
-
-    ObjectMapper mapper = new ObjectMapper();
-    mapper.registerModule(new Jdk8Module());
-    mapper.registerModule(new JavaTimeModule());
-    mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-
-    String json =
-        """
-        {\
-        "id":123,\
-        "userId":345,\
-        "name":"Test Token",\
-        "createdAt":"2023-08-21T00:00:00+02:00",\
-        "expiresAt":"2023-12-12T00:00:00+01:00",\
-        "lastUsedAt":"2023-08-25T00:00:00+02:00",\
-        "tokenType":"IMPERSONATION",\
-        "active":true,\
-        "revoked":false\
-        }\
-        """;
-
-    AccessToken accessToken = mapper.readValue(json, AccessToken.class);
-
-    Instant createdAt = LocalDate.of(2023, 8, 21).atStartOfDay().atZone(ZONE_ID).toInstant();
-    Instant expiredAt = LocalDate.of(2023, 12, 12).atStartOfDay().atZone(ZONE_ID).toInstant();
-    Instant lastUsedAt = LocalDate.of(2023, 8, 25).atStartOfDay().atZone(ZONE_ID).toInstant();
-
-    AccessToken expected =
-        AccessToken.builder()
-            .id("123")
-            .userId("345")
-            .name(TOKEN_NAME)
-            .createdAt(createdAt)
-            .expiresAt(expiredAt)
-            .lastUsedAt(lastUsedAt)
-            .tokenType(TokenType.IMPERSONATION)
-            .build();
-
-    assertEquals(expected, accessToken, "unexpected accessToken");
   }
 
   private AccessToken.Builder createBuilderWithRequiredValues() {

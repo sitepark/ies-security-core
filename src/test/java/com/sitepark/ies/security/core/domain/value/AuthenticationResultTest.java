@@ -3,13 +3,13 @@ package com.sitepark.ies.security.core.domain.value;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jparams.verifier.tostring.ToStringVerifier;
 import com.sitepark.ies.sharedkernel.security.User;
 import java.util.List;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.MapperFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 class AuthenticationResultTest {
   @Test
@@ -43,9 +43,13 @@ class AuthenticationResultTest {
   }
 
   @Test
-  void testSerializeFailure() throws JsonProcessingException {
-    ObjectMapper mapper = new ObjectMapper();
-    mapper.setDefaultPropertyInclusion(JsonInclude.Include.NON_EMPTY);
+  void testSerializeFailure() {
+    JsonMapper mapper =
+        JsonMapper.builder()
+            .disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
+            .changeDefaultPropertyInclusion(
+                inclusion -> inclusion.withValueInclusion(JsonInclude.Include.NON_EMPTY))
+            .build();
     AuthenticationResult result = AuthenticationResult.failure();
     String json = mapper.writeValueAsString(result);
     String expected =
@@ -57,9 +61,13 @@ class AuthenticationResultTest {
   }
 
   @Test
-  void testSerializeSuccess() throws JsonProcessingException {
-    ObjectMapper mapper = new ObjectMapper();
-    mapper.setDefaultPropertyInclusion(JsonInclude.Include.NON_EMPTY);
+  void testSerializeSuccess() {
+    JsonMapper mapper =
+        JsonMapper.builder()
+            .disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
+            .changeDefaultPropertyInclusion(
+                inclusion -> inclusion.withValueInclusion(JsonInclude.Include.NON_EMPTY))
+            .build();
     User user = User.builder().id("1").username("test").lastName("test").build();
     AuthenticationResult result = AuthenticationResult.success(user, "purpose");
     String json = mapper.writeValueAsString(result);
@@ -72,9 +80,13 @@ class AuthenticationResultTest {
   }
 
   @Test
-  void testSerializePartial() throws JsonProcessingException {
-    ObjectMapper mapper = new ObjectMapper();
-    mapper.setDefaultPropertyInclusion(JsonInclude.Include.NON_EMPTY);
+  void testSerializePartial() {
+    JsonMapper mapper =
+        JsonMapper.builder()
+            .disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY)
+            .changeDefaultPropertyInclusion(
+                inclusion -> inclusion.withValueInclusion(JsonInclude.Include.NON_EMPTY))
+            .build();
     AuthenticationResult result =
         AuthenticationResult.partial("123", List.of(AuthenticationRequirement.TOTP_CODE_REQUIRED));
     String json = mapper.writeValueAsString(result);

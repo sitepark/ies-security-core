@@ -20,9 +20,6 @@ module com.sitepark.ies.security.core {
   requires org.apache.logging.log4j;
   requires jakarta.inject;
   requires com.fasterxml.jackson.annotation;
-  requires com.fasterxml.jackson.databind;
-  requires com.fasterxml.jackson.datatype.jdk8;
-  requires com.fasterxml.jackson.datatype.jsr310;
   requires com.sitepark.ies.sharedkernel;
 
   opens com.sitepark.ies.security.core.port;

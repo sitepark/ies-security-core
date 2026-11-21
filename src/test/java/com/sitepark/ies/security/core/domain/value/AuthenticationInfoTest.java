@@ -2,17 +2,18 @@ package com.sitepark.ies.security.core.domain.value;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sitepark.ies.sharedkernel.security.AuthMethod;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.MapperFeature;
+import tools.jackson.databind.json.JsonMapper;
 
 class AuthenticationInfoTest {
 
   @Test
-  void testSerialize() throws JsonProcessingException {
-    ObjectMapper mapper = new ObjectMapper();
+  void testSerialize() {
+    JsonMapper mapper =
+        JsonMapper.builder().disable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY).build();
     AuthenticationInfo info = new AuthenticationInfo(List.of(AuthMethod.PASSWORD));
 
     String json = mapper.writeValueAsString(info);
