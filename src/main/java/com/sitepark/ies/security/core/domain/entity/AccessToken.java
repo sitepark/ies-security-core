@@ -2,8 +2,6 @@ package com.sitepark.ies.security.core.domain.entity;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sitepark.ies.security.core.domain.value.TokenType;
 import com.sitepark.ies.sharedkernel.base.ListBuilder;
 import com.sitepark.ies.sharedkernel.security.Permission;
@@ -17,7 +15,6 @@ import org.jspecify.annotations.Nullable;
 /**
  * An access token enables authentication as a user without specifying a username and newPassword.
  */
-@JsonDeserialize(builder = AccessToken.Builder.class)
 @SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName", "PMD.TooManyMethods"})
 public final class AccessToken {
 
@@ -176,7 +173,6 @@ public final class AccessToken {
   }
 
   @SuppressWarnings("PMD.TooManyMethods")
-  @JsonPOJOBuilder(withPrefix = "")
   public static final class Builder {
 
     @Nullable private String id;

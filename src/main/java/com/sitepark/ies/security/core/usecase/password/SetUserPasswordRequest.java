@@ -1,11 +1,8 @@
 package com.sitepark.ies.security.core.usecase.password;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import java.util.Objects;
 import org.jspecify.annotations.Nullable;
 
-@JsonDeserialize(builder = SetUserPasswordRequest.Builder.class)
 @SuppressWarnings({"PMD.AvoidFieldNameMatchingMethodName"})
 public final class SetUserPasswordRequest {
 
@@ -67,7 +64,6 @@ public final class SetUserPasswordRequest {
         + '}';
   }
 
-  @JsonPOJOBuilder(withPrefix = "")
   public static final class Builder {
 
     @Nullable private String userId;
