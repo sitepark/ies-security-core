@@ -82,6 +82,7 @@ com.sitepark.ies.security.core/
 │   ├── AccessTokenRepository.java
 │   ├── AuthenticationProvider.java
 │   ├── SessionRegistry.java
+│   ├── SessionNotifier.java
 │   ├── UserService.java
 │   ├── TokenService.java
 │   ├── Vault.java
@@ -129,6 +130,7 @@ com.sitepark.ies.security.core/
 - Examples:
   - `UserService`: Load user data from storage
   - `SessionRegistry`: Manage session persistence
+  - `SessionNotifier`: Tell the application about sessions that end (logout, timeout)
   - `Vault`: Secure credential storage
   - `TokenService`: Token cryptography operations
 
